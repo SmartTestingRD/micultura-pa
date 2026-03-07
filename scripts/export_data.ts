@@ -1,7 +1,15 @@
 import { Client } from 'pg';
 import fs from 'fs';
 
-const sourceDbUrl = 'postgresql://neondb_owner:npg_HSK5kPoQYj9w@ep-billowing-shadow-ai7yereu-pooler.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require';
+import * as dotenv from 'dotenv';
+dotenv.config();
+
+const sourceDbUrl = process.env.DATABASE_URL;
+
+if (!sourceDbUrl) {
+    console.error('DATABASE_URL environment variable is required');
+    process.exit(1);
+}
 
 const tables = [
     'internal_users',
