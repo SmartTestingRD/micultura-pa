@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+    --color-primary: #002857;
+    --color-primary-dark: #001a38;
+    --color-secondary: #ab192d;
+    --color-background-light: #f8fafc;
+    --color-background-dark: #0f172a;
+    --color-surface-light: #ffffff;
+    --color-surface-dark: #1e293b;
+
+    --font-display: "Inter", sans-serif;
+}
+
+@layer utilities {
+    .animate-on-scroll {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+    }
+
+    .animate-on-scroll.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Retrasos escalonados para listas o grids */
+    .delay-100 {
+        transition-delay: 100ms;
+    }
+
+    .delay-200 {
+        transition-delay: 200ms;
+    }
+
+    .delay-300 {
+        transition-delay: 300ms;
+    }
+
+    .delay-400 {
+        transition-delay: 400ms;
+    }
+
+    /* Magia adicional: Brillo sutil en las tarjetas al pasar el ratón */
+    .magic-card {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .magic-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 100%);
+        transform: skewX(-25deg);
+        z-index: 50;
+        transition: left 0.7s ease;
+    }
+
+    .magic-card:hover::before {
+        left: 200%;
+    }
+}

@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Sicultura Panamá - Redesign</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#002857", /* rgb(0, 40, 87) */
+                        "primary-dark": "#001a38",
+                        "secondary": "#ab192d", /* rgb(171, 25, 45) */
+                        "background-light": "#f8fafc", /* slightly cooler white */
+                        "background-dark": "#0f172a", /* slate 900 */
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1e293b", /* slate 800 */
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .animate-on-scroll.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Retrasos escalonados para listas o grids */
+        .delay-100 {
+            transition-delay: 100ms;
+        }
+
+        .delay-200 {
+            transition-delay: 200ms;
+        }
+
+        .delay-300 {
+            transition-delay: 300ms;
+        }
+
+        .delay-400 {
+            transition-delay: 400ms;
+        }
+
+        /* Magia adicional: Brillo sutil en las tarjetas al pasar el ratón */
+        .magic-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .magic-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 100%);
+            transform: skewX(-25deg);
+            z-index: 50;
+            transition: left 0.7s ease;
+        }
+
+        .magic-card:hover::before {
+            left: 200%;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col selection:bg-primary/20">
+    <!-- Sticky Header -->
+    <header
+        class="sticky top-0 z-50 w-full backdrop-blur-md bg-surface-light/80 dark:bg-background-dark/80 border-b border-slate-200 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <a href="index.html"
+                    class="flex-shrink-0 flex items-center gap-2 cursor-pointer transition-transform hover:scale-105">
+                    <img src="logo_micultura.png" alt="Sicultura Panamá Logo" class="h-12 w-auto">
+                </a>
+                <!-- Desktop Nav -->
+                <nav class="hidden md:flex space-x-8">
+                    <a class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
+                        href="directorio.html">Directorio</a>
+                    <a class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
+                        href="mapa.html">Mapa</a>
+                    <a class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
+                        href="estadisticas.html">Estadísticas</a>
+                    <a class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
+                        href="novedades.html">Novedades</a>
+                    <a class="text-slate-600 dark:text-slate-300 hover:text-primary dark:hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
+                        href="documentos.html">Documentos</a>
+                </nav>
+
+                <!-- Actions -->
+                <div class="flex items-center gap-4">
+                    <button id="theme-toggle"
+                        class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-600 dark:text-slate-300"
+                        aria-label="Toggle Dark Mode">
+                        <span id="theme-toggle-light-icon" class="material-symbols-outlined hidden">light_mode</span>
+                        <span id="theme-toggle-dark-icon" class="material-symbols-outlined">dark_mode</span>
+                    </button>
+                    <button id="btn-login"
+                        class="hidden sm:block text-slate-600 dark:text-slate-300 hover:text-primary text-sm font-medium">Login</button>
+                    <button id="btn-register"
+                        class="bg-primary hover:bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-bold transition-all shadow-lg shadow-primary/25">
+                        Registrarse
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- Hero Section with Immersive Background -->
+    <section class="relative w-full h-[600px] flex items-center justify-center overflow-hidden">
+        <!-- Background Image with Overlay -->
+        <div class="absolute inset-0 z-0">
+            <div
+                class="absolute inset-0 bg-gradient-to-b from-slate-900/60 via-slate-900/40 to-background-light dark:to-background-dark z-10">
+            </div>
+            <img alt="Cultural dance performance in Panama" class="w-full h-full object-cover object-center"
+                data-alt="Vibrant traditional Panamanian dancers in polleras"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrwWUtTyNGc0IziVTHYYapMmPm8y71ed9ujt-lpWTK3T0vg7Ved80wGkNNXi4G9qKugckP6AbP1ZZoFG9dPNXvI-IiXp8nCfQIww2ud28FfnxR5eSIV0d5ZkyTLKxfq0reXgQce962B8ARamjr7hZ5owTF6-tZDe3ihcLDkFCCWUUeuT9unhx97ZAgeW0cVvBxtQO3yCZ8rBfYmjCllaFvJit8TVBq02as_t3EZX8r_5F85hwyzPpp7XkyjZRC-n-gPbt5ckt2msA" />
+        </div>
+        <!-- Content -->
+        <div class="relative z-20 w-full max-w-4xl px-4 text-center">
+            <span
+                class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white text-xs font-medium mb-6 animate-fade-in-up">
+                <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                Portal Oficial de Recursos Culturales
+            </span>
+            <h1 class="text-4xl md:text-6xl font-black text-white tracking-tight mb-4 drop-shadow-sm leading-tight">
+                Explora la Riqueza <br /> Cultural de Panamá
+            </h1>
+            <p class="text-lg md:text-xl text-slate-200 font-medium mb-10 max-w-2xl mx-auto leading-relaxed">
+                Descubre manifestaciones artísticas, espacios históricos y eventos culturales en un solo lugar.
+            </p>
+            <!-- Search Bar Component -->
+            <div
+                class="w-full max-w-2xl mx-auto bg-white dark:bg-surface-dark p-2 rounded-2xl shadow-2xl flex flex-col sm:flex-row gap-2 transform transition-transform hover:scale-[1.01]">
+                <div
+                    class="flex-1 flex items-center px-4 h-12 sm:h-auto border-b sm:border-b-0 border-slate-100 dark:border-slate-700">
+                    <span class="material-symbols-outlined text-slate-400 mr-3">search</span>
+                    <input id="hero-search-input"
+                        class="w-full bg-transparent border-none focus:ring-0 text-slate-900 dark:text-white placeholder-slate-400 text-base"
+                        placeholder="¿Qué estás buscando? Ej. Museos, Danza..." type="text" />
+                </div>
+                <div class="h-12 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block my-2"></div>
+                <div class="flex-shrink-0 flex items-center px-2 pb-2 sm:pb-0">
+                    <button id="hero-search-btn"
+                        class="w-full sm:w-auto bg-primary hover:bg-blue-600 text-white px-8 py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2">
+                        Buscar
+                    </button>
+                </div>
+            </div>
+            <div
+                class="mt-8 flex flex-wrap items-center justify-center gap-4 text-sm font-medium text-white drop-shadow-md mx-auto w-max px-6 py-2 rounded-full bg-black/30 backdrop-blur-sm border border-white/10">
+                <span class="opacity-90 font-bold">Tendencias:</span>
+                <a class="hover:text-primary transition-colors hover:bg-white/10 px-3 py-1 rounded-full cursor-pointer"
+                    href="#">Casco Antiguo</a>
+                <a class="hover:text-primary transition-colors hover:bg-white/10 px-3 py-1 rounded-full cursor-pointer"
+                    href="#">Festival de Jazz</a>
+                <a class="hover:text-primary transition-colors hover:bg-white/10 px-3 py-1 rounded-full cursor-pointer"
+                    href="#">Museos</a>
+            </div>
+        </div>
+    </section>
+    <!-- Main Content Container -->
+    <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-30 pb-20">
+        <!-- Quick Stats / Highlights -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+            <div
+                class="animate-on-scroll bg-white dark:bg-surface-dark rounded-xl p-6 shadow-lg shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center text-center group hover:border-primary/50 transition-colors cursor-pointer delay-100">
+                <div
+                    class="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/20 text-primary flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined">theater_comedy</span>
+                </div>
+                <h3 class="font-bold text-slate-900 dark:text-white text-lg">2,400+</h3>
+                <p class="text-slate-500 dark:text-slate-400 text-sm">Manifestaciones</p>
+            </div>
+            <div
+                class="animate-on-scroll bg-white dark:bg-surface-dark rounded-xl p-6 shadow-lg shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center text-center group hover:border-primary/50 transition-colors cursor-pointer delay-200">
+                <div
+                    class="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/20 text-primary flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined">museum</span>
+                </div>
+                <h3 class="font-bold text-slate-900 dark:text-white text-lg">180+</h3>
+                <p class="text-slate-500 dark:text-slate-400 text-sm">Espacios</p>
+            </div>
+            <div
+                class="animate-on-scroll bg-white dark:bg-surface-dark rounded-xl p-6 shadow-lg shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center text-center group hover:border-primary/50 transition-colors cursor-pointer delay-300">
+                <div
+                    class="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/20 text-primary flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined">groups</span>
+                </div>
+                <h3 class="font-bold text-slate-900 dark:text-white text-lg">500+</h3>
+                <p class="text-slate-500 dark:text-slate-400 text-sm">Grupos</p>
+            </div>
+            <div
+                class="animate-on-scroll bg-white dark:bg-surface-dark rounded-xl p-6 shadow-lg shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center text-center group hover:border-primary/50 transition-colors cursor-pointer delay-400">
+                <div
+                    class="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/20 text-primary flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined">event</span>
+                </div>
+                <h3 class="font-bold text-slate-900 dark:text-white text-lg">12/sem</h3>
+                <p class="text-slate-500 dark:text-slate-400 text-sm">Eventos</p>
+            </div>
+        </div>
+        <!-- Categories / High Impact Grid -->
+        <div class="mb-20">
+            <div class="flex items-end justify-between mb-8">
+                <div>
+                    <h2 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Categorías Principales
+                    </h2>
+                    <p class="text-slate-500 dark:text-slate-400 mt-2">Navega a través de los pilares de nuestra
+                        identidad.</p>
+                </div>
+                <a class="hidden sm:flex items-center text-primary font-semibold hover:text-blue-700 transition-colors"
+                    href="#">
+                    Ver todo
+                    <span class="material-symbols-outlined ml-1 text-sm">arrow_forward</span>
+                </a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[300px]">
+                <!-- Large Card 1 -->
+                <a class="animate-on-scroll magic-card group relative overflow-hidden rounded-2xl md:col-span-2 row-span-1 delay-100"
+                    href="#">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10 transition-opacity opacity-90 group-hover:opacity-100">
+                    </div>
+                    <img alt="Traditional Panamanian dance"
+                        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        data-alt="Dancers in traditional Pollera dresses performing"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNJCxTiZJLIG3xB_K9vkCGwqfFybLaUCFKQKWFPgmcP77XekUn6QDlP4AFa8MJeMqGfY58q0wjKw5IxDRCqF5t56KfiV1kPhPOXpwtb5If0tT9YT6CDvJVnyi3IgJMLo0CGbckcIQonYjoH617Av2W__gTKWFDKqLWDDWdhrB-LbxWu-6Ih77kMIfaNGIWMDXCaDWGjqeLJbgolV7ZPJo9GC6y8mLXsEp6VBh33u08gHrX93SpHiQQMbtsl2d9qNb9wy3p4VC2-qo" />
+                    <div class="absolute bottom-0 left-0 p-8 z-20">
+                        <span class="text-primary-300 text-sm font-bold uppercase tracking-wider mb-2 block">Patrimonio
+                            Inmaterial</span>
+                        <h3
+                            class="text-3xl font-bold text-white mb-2 transform transition-transform group-hover:-translate-y-1">
+                            Manifestaciones</h3>
+                        <p class="text-slate-300 line-clamp-2 max-w-md">Danzas, músicas, tradiciones orales y
+                            celebraciones que definen nuestra identidad.</p>
+                    </div>
+                    <div
+                        class="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                        <span class="material-symbols-outlined">arrow_outward</span>
+                    </div>
+                </a>
+                <!-- Tall Card 2 -->
+                <a class="animate-on-scroll magic-card group relative overflow-hidden rounded-2xl row-span-1 md:row-span-2 delay-200"
+                    href="#">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent z-10 transition-opacity opacity-80 group-hover:opacity-100">
+                    </div>
+                    <img alt="Historical architecture in Casco Viejo"
+                        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        data-alt="Colonial architecture facade in Casco Antiguo"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0p3sFavZlEYkBQ2a3KjfZu4kwdYBlIVZe5yFgKKHDTzaghbZkt5cY2wVd0EY01jCPEt5aTs-vopicVxtF_D9JzAQV4C9pDE9pFL8mXT16-kwq3rhhCcOVHSguf_z7-QyUGCMccyHbf3dmlLvvy-LPkPqlVFG7v0sNuX6N-zjAW1xgyj7Q2sSFopFPXNsbSZ0k0G62h_Ghv1aGtQIBNI00G2hqckg5puy_7bKE8sRvvRZ-O42N3tIE78vwR0h5uvk1FIHe7K7ulFY" />
+                    <div class="absolute bottom-0 left-0 p-8 z-20">
+                        <span class="text-blue-300 text-sm font-bold uppercase tracking-wider mb-2 block">Lugares</span>
+                        <h3
+                            class="text-3xl font-bold text-white mb-2 transform transition-transform group-hover:-translate-y-1">
+                            Espacios Culturales</h3>
+                        <p class="text-slate-300 line-clamp-3">Museos, teatros, bibliotecas y sitios arqueológicos
+                            abiertos al público.</p>
+                    </div>
+                </a>
+                <!-- Standard Card 3 -->
+                <a class="animate-on-scroll magic-card group relative overflow-hidden rounded-2xl delay-300" href="#">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10 transition-opacity opacity-90 group-hover:opacity-100">
+                    </div>
+                    <img alt="Music festival crowd"
+                        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        data-alt="Crowd enjoying a live cultural music event"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxeL55HcePobxvlOuRtO99--wdioiORbw9wKBphVPnHgVCUKAW9yeCWv2Ycid_H62JI6Qtf-Va60lWCZMpgHuwZxcOpmIhYMJOO5Ju2TzpUgDdPSkPzz_hhZavRs718s69cJSX9jlOiviC1nHK4KQSWkj6Fjhr29C7-_m6FouId6vGxXfom-xjv27kqItaP6RLdYge2fAXdgSPRluKeBDtbAKXkEOnlfw0CfykUTYqNWwGnDtci_36c_b9gdPV7BSiAsNs-QVaFDg" />
+                    <div class="absolute bottom-0 left-0 p-6 z-20">
+                        <h3
+                            class="text-xl font-bold text-white transform transition-transform group-hover:-translate-y-1">
+                            Eventos &amp; Festivales</h3>
+                        <p class="text-slate-300 text-sm mt-1">Calendario nacional</p>
+                    </div>
+                </a>
+                <!-- Standard Card 4 -->
+                <a class="animate-on-scroll magic-card group relative overflow-hidden rounded-2xl delay-400" href="#">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10 transition-opacity opacity-90 group-hover:opacity-100">
+                    </div>
+                    <img alt="Artisans working"
+                        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        data-alt="Close up of artisan hands creating crafts"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYvSrI3yQqkEbbFBqPPGGWO5b9vTX5HFo_ptTKEJIGb0h8pfPOz3IHt-zHeXqD7SZLzcKEX9HM4BbRADk9r7ulMV-b1zPWG8J5zoHitVAIZ8ox-Ve4dXUcYPlX4qq86AablCn4x-6NMST1ui5008_twixYGfVmIHMn6ovj0DMnSjPvp7t3_xvz6U5ciQQrhfwHoDGfT1rfXkBZOa_5Ijmg0HV7JDMlZO3ORj4jtK2U4WbqEeSZ1KRMAGI_x6-wRjAmkotUD09U6kg" />
+                    <div class="absolute bottom-0 left-0 p-6 z-20">
+                        <h3
+                            class="text-xl font-bold text-white transform transition-transform group-hover:-translate-y-1">
+                            Agentes Culturales</h3>
+                        <p class="text-slate-300 text-sm mt-1">Artistas y gestores</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <!-- Directory Quick Access (Simplified) -->
+        <div class="mb-20">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-6">Directorio Rápido</h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <a class="flex flex-col items-center justify-center p-6 bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-800 rounded-xl hover:border-primary hover:shadow-md transition-all group"
+                    href="#">
+                    <span
+                        class="material-symbols-outlined text-3xl text-slate-400 group-hover:text-primary mb-3 transition-colors">palette</span>
+                    <span class="font-medium text-slate-700 dark:text-slate-300 group-hover:text-primary text-sm">Artes
+                        Visuales</span>
+                </a>
+                <a class="flex flex-col items-center justify-center p-6 bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-800 rounded-xl hover:border-primary hover:shadow-md transition-all group"
+                    href="#">
+                    <span
+                        class="material-symbols-outlined text-3xl text-slate-400 group-hover:text-primary mb-3 transition-colors">music_note</span>
+                    <span
+                        class="font-medium text-slate-700 dark:text-slate-300 group-hover:text-primary text-sm">Música</span>
+                </a>
+                <a class="flex flex-col items-center justify-center p-6 bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-800 rounded-xl hover:border-primary hover:shadow-md transition-all group"
+                    href="#">
+                    <span
+                        class="material-symbols-outlined text-3xl text-slate-400 group-hover:text-primary mb-3 transition-colors">menu_book</span>
+                    <span
+                        class="font-medium text-slate-700 dark:text-slate-300 group-hover:text-primary text-sm">Literatura</span>
+                </a>
+                <a class="flex flex-col items-center justify-center p-6 bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-800 rounded-xl hover:border-primary hover:shadow-md transition-all group"
+                    href="#">
+                    <span
+                        class="material-symbols-outlined text-3xl text-slate-400 group-hover:text-primary mb-3 transition-colors">movie</span>
+                    <span
+                        class="font-medium text-slate-700 dark:text-slate-300 group-hover:text-primary text-sm">Cine</span>
+                </a>
+                <a class="flex flex-col items-center justify-center p-6 bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-800 rounded-xl hover:border-primary hover:shadow-md transition-all group"
+                    href="#">
+                    <span
+                        class="material-symbols-outlined text-3xl text-slate-400 group-hover:text-primary mb-3 transition-colors">restaurant</span>
+                    <span
+                        class="font-medium text-slate-700 dark:text-slate-300 group-hover:text-primary text-sm">Gastronomía</span>
+                </a>
+                <a class="flex flex-col items-center justify-center p-6 bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-800 rounded-xl hover:border-primary hover:shadow-md transition-all group"
+                    href="#">
+                    <span
+                        class="material-symbols-outlined text-3xl text-slate-400 group-hover:text-primary mb-3 transition-colors">add</span>
+                    <span class="font-medium text-slate-700 dark:text-slate-300 group-hover:text-primary text-sm">Ver
+                        Más</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Últimas Novedades -->
+        <div class="mb-20">
+            <div class="flex items-end justify-between mb-8">
+                <div>
+                    <h2 class="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Últimas Novedades</h2>
+                    <p class="text-slate-500 dark:text-slate-400 mt-2">Mantente al tanto de las noticias y convocatorias
+                        culturales.</p>
+                </div>
+                <a class="hidden sm:flex items-center text-primary font-semibold hover:text-blue-700 transition-colors"
+                    href="novedades.html">
+                    Ver todas las noticias
+                    <span class="material-symbols-outlined ml-1 text-sm">arrow_forward</span>
+                </a>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- News Card 1 -->
+                <article
+                    class="animate-on-scroll bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all group flex flex-col delay-100">
+                    <div class="relative h-48 overflow-hidden">
+                        <img src="https://picsum.photos/seed/novedades1/800/600" alt="Nueva Biblioteca"
+                            class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                        <div class="absolute top-4 left-4">
+                            <span
+                                class="bg-primary text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">Anuncio</span>
+                        </div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <div class="flex items-center text-slate-400 text-sm mb-3 gap-2">
+                            <span class="material-symbols-outlined text-sm">calendar_month</span>
+                            <time datetime="2026-02-23">23 Feb 2026</time>
+                        </div>
+                        <h3
+                            class="text-xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-primary transition-colors">
+                            Apertura de la Nueva Biblioteca Nacional</h3>
+                        <p class="text-slate-500 dark:text-slate-400 text-sm mb-6 flex-1 line-clamp-3">El Ministerio de
+                            Cultura se complace en anunciar la inauguración de las nuevas instalaciones centrales,
+                            dotadas con tecnología de punta...</p>
+                        <a href="#"
+                            class="inline-flex items-center text-primary font-semibold hover:text-blue-700 transition-colors text-sm mt-auto">
+                            Leer publicación
+                            <span
+                                class="material-symbols-outlined ml-1 text-base transform group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- News Card 2 -->
+                <article
+                    class="animate-on-scroll bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all group flex flex-col delay-200">
+                    <div class="relative h-48 overflow-hidden">
+                        <img src="https://picsum.photos/seed/novedades2/800/600" alt="Fondo Cultural"
+                            class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                        <div class="absolute top-4 left-4">
+                            <span
+                                class="bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">Convocatorias</span>
+                        </div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <div class="flex items-center text-slate-400 text-sm mb-3 gap-2">
+                            <span class="material-symbols-outlined text-sm">calendar_month</span>
+                            <time datetime="2026-02-20">20 Feb 2026</time>
+                        </div>
+                        <h3
+                            class="text-xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-primary transition-colors">
+                            Abren inscripciones para el Fondo de Cine</h3>
+                        <p class="text-slate-500 dark:text-slate-400 text-sm mb-6 flex-1 line-clamp-3">Cineastas
+                            panameños podrán aplicar al fondo extraordinario de desarrollo y producción audiovisual para
+                            proyectos locales...</p>
+                        <a href="#"
+                            class="inline-flex items-center text-primary font-semibold hover:text-blue-700 transition-colors text-sm mt-auto">
+                            Leer publicación
+                            <span
+                                class="material-symbols-outlined ml-1 text-base transform group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- News Card 3 -->
+                <article
+                    class="animate-on-scroll bg-white dark:bg-surface-dark border border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all group flex flex-col delay-300">
+                    <div class="relative h-48 overflow-hidden">
+                        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrwWUtTyNGc0IziVTHYYapMmPm8y71ed9ujt-lpWTK3T0vg7Ved80wGkNNXi4G9qKugckP6AbP1ZZoFG9dPNXvI-IiXp8nCfQIww2ud28FfnxR5eSIV0d5ZkyTLKxfq0reXgQce962B8ARamjr7hZ5owTF6-tZDe3ihcLDkFCCWUUeuT9unhx97ZAgeW0cVvBxtQO3yCZ8rBfYmjCllaFvJit8TVBq02as_t3EZX8r_5F85hwyzPpp7XkyjZRC-n-gPbt5ckt2msA"
+                            alt="Festival de Diablicos"
+                            class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                        <div class="absolute top-4 left-4">
+                            <span
+                                class="bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">Eventos</span>
+                        </div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <div class="flex items-center text-slate-400 text-sm mb-3 gap-2">
+                            <span class="material-symbols-outlined text-sm">calendar_month</span>
+                            <time datetime="2026-02-18">18 Feb 2026</time>
+                        </div>
+                        <h3
+                            class="text-xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-primary transition-colors">
+                            Éxito total en el Festival Folklórico 2026</h3>
+                        <p class="text-slate-500 dark:text-slate-400 text-sm mb-6 flex-1 line-clamp-3">Con una
+                            asistencia récord de cientos de personas, las festividades en la Villa de Los Santos
+                            celebraron nuestras tradiciones...</p>
+                        <a href="#"
+                            class="inline-flex items-center text-primary font-semibold hover:text-blue-700 transition-colors text-sm mt-auto">
+                            Leer publicación
+                            <span
+                                class="material-symbols-outlined ml-1 text-base transform group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                        </a>
+                    </div>
+                </article>
+            </div>
+
+            <!-- Botón Ver Todas (Versión Móvil) -->
+            <a href="novedades.html"
+                class="flex sm:hidden w-full mt-6 justify-center items-center py-3 px-4 bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-bold shadow-sm hover:shadow-md transition-all active:scale-95">
+                Ver todas las noticias
+            </a>
+        </div>
+        <!-- Interactive Map Preview -->
+        <div
+            class="animate-on-scroll bg-slate-900 rounded-3xl overflow-hidden shadow-2xl relative h-[500px] flex flex-col md:flex-row">
+            <!-- Map Content -->
+            <div class="flex-1 relative order-2 md:order-1 h-64 md:h-auto">
+                <img alt="Map view of Panama" class="w-full h-full object-cover opacity-60 grayscale"
+                    data-alt="Dark themed map interface with glowing location pins" data-location="Panama City"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5vcZjkA09mebo8SeMyRTlPKrPpB7Im8Cs-3X5SheQx8N-JdZH5G4jQY2NXAxyMWLZpUAOtAdix98kx5ucybBMKmAGOT63W_yP-aWA6xUN_jSCYfqmBMTmdjllJT06IJo6emt53-cT4V1lIa-TaEKlasUC6IXQB8jrdphXZjfSPGjOpoTlNf0RuEhAkO21WysMn_VrIWKNjWc64oWgcCkTBmuNWUfC3i-vREPumnqaakgWS7_GsbSIP_AMIRMQBf8SFm9YGvKBHts" />
+                <!-- Map UI Overlay -->
+                <div class="absolute inset-0 p-4 pointer-events-none">
+                    <!-- Pins -->
+                    <div
+                        class="absolute top-1/2 left-1/2 -translate-x-10 -translate-y-10 group cursor-pointer pointer-events-auto">
+                        <span class="relative flex h-4 w-4">
+                            <span
+                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                            <span
+                                class="relative inline-flex rounded-full h-4 w-4 bg-primary border-2 border-white"></span>
+                        </span>
+                        <div
+                            class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max opacity-0 group-hover:opacity-100 transition-opacity bg-white text-slate-900 text-xs font-bold px-2 py-1 rounded shadow-lg">
+                            Museo del Canal</div>
+                    </div>
+                    <div class="absolute top-1/3 left-1/3 group cursor-pointer pointer-events-auto">
+                        <span class="relative flex h-4 w-4">
+                            <span
+                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75 delay-100"></span>
+                            <span
+                                class="relative inline-flex rounded-full h-4 w-4 bg-primary border-2 border-white"></span>
+                        </span>
+                        <div
+                            class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max opacity-0 group-hover:opacity-100 transition-opacity bg-white text-slate-900 text-xs font-bold px-2 py-1 rounded shadow-lg">
+                            Teatro Nacional</div>
+                    </div>
+                    <!-- Zoom Controls -->
+                    <div class="absolute bottom-4 right-4 flex flex-col gap-2 pointer-events-auto">
+                        <button
+                            class="bg-surface-dark text-white p-2 rounded-lg hover:bg-slate-700 shadow-lg border border-slate-700">
+                            <span class="material-symbols-outlined text-lg">add</span>
+                        </button>
+                        <button
+                            class="bg-surface-dark text-white p-2 rounded-lg hover:bg-slate-700 shadow-lg border border-slate-700">
+                            <span class="material-symbols-outlined text-lg">remove</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- Map Sidebar Info -->
+            <div
+                class="w-full md:w-96 bg-surface-dark p-8 flex flex-col justify-center order-1 md:order-2 border-l border-slate-800">
+                <div class="inline-flex items-center gap-2 text-primary mb-4">
+                    <span class="material-symbols-outlined">map</span>
+                    <span class="uppercase tracking-widest text-xs font-bold">Geolocalización</span>
+                </div>
+                <h2 class="text-3xl font-bold text-white mb-4">Mapa Cultural Interactivo</h2>
+                <p class="text-slate-400 mb-8 leading-relaxed">
+                    Localiza museos, centros culturales y eventos cerca de ti. Planifica tu ruta cultural por Panamá con
+                    nuestra herramienta interactiva.
+                </p>
+                <div class="space-y-4">
+                    <div
+                        class="flex items-center gap-4 text-slate-300 bg-slate-800/50 p-3 rounded-lg border border-slate-700">
+                        <span class="material-symbols-outlined text-primary">near_me</span>
+                        <div class="text-sm">
+                            <span class="block font-bold text-white">Cerca de ti</span>
+                            <span>3 eventos encontrados hoy</span>
+                        </div>
+                    </div>
+                </div>
+                <button
+                    class="mt-8 bg-primary hover:bg-blue-600 text-white py-3 px-6 rounded-lg font-bold transition-all flex items-center justify-center gap-2 group">
+                    Explorar Mapa Completo
+                    <span
+                        class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                </button>
+            </div>
+        </div>
+    </main>
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-surface-dark border-t border-slate-200 dark:border-slate-800">
+        <!-- Newsletter Section -->
+        <div class="border-b border-slate-200 dark:border-slate-800">
+            <div
+                class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col md:flex-row items-center justify-between gap-8">
+                <div class="max-w-xl">
+                    <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Suscríbete al boletín informativo
+                    </h3>
+                    <p class="text-slate-500 dark:text-slate-400">Recibe las últimas noticias, eventos y convocatorias
+                        culturales de Panamá directamente en tu correo electrónico.</p>
+                </div>
+                <form
+                    class="w-full md:w-auto flex-1 max-w-md flex shadow-sm hover:shadow-md transition-shadow rounded-xl">
+                    <label for="newsletter-email" class="sr-only">Correo electrónico</label>
+                    <input type="email" id="newsletter-email" placeholder="Tu correo electrónico"
+                        class="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-l-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                        required>
+                    <button type="submit"
+                        class="bg-primary hover:bg-blue-600 text-white font-bold px-6 py-3 rounded-r-xl transition-colors">
+                        Suscribirse
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+                <!-- Branding Column -->
+                <div class="flex flex-col gap-6">
+                    <a href="index.html"
+                        class="flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 w-max">
+                        <img src="logo_micultura.png" alt="Sicultura Panamá Logo" class="h-12 w-auto">
+                    </a>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                        Sistema de Información Cultural de Panamá. Un proyecto del Ministerio de Cultura para conectar y
+                        promover nuestra riqueza cultural.
+                    </p>
+                    <div class="flex flex-wrap gap-3">
+                        <!-- Instagram -->
+                        <a class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-pink-600 hover:text-white transition-all group"
+                            href="#" aria-label="Instagram">
+                            <svg class="w-5 h-5 fill-current transform group-hover:scale-110 transition-transform"
+                                viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2.163c3.204 0 3.584.012 4.85.072 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z">
+                                </path>
+                            </svg>
+                        </a>
+                        <!-- Facebook -->
+                        <a class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-blue-600 hover:text-white transition-all group"
+                            href="#" aria-label="Facebook">
+                            <svg class="w-5 h-5 fill-current transform group-hover:scale-110 transition-transform"
+                                viewBox="0 0 24 24">
+                                <path
+                                    d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z">
+                                </path>
+                            </svg>
+                        </a>
+                        <!-- LinkedIn -->
+                        <a class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-blue-700 hover:text-white transition-all group"
+                            href="#" aria-label="LinkedIn">
+                            <svg class="w-5 h-5 fill-current transform group-hover:scale-110 transition-transform"
+                                viewBox="0 0 24 24">
+                                <path
+                                    d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z">
+                                </path>
+                            </svg>
+                        </a>
+                        <!-- X (Twitter) -->
+                        <a class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-black dark:hover:bg-white dark:hover:text-black hover:text-white transition-all group"
+                            href="#" aria-label="X (Twitter)">
+                            <svg class="w-4 h-4 fill-current transform group-hover:scale-110 transition-transform"
+                                viewBox="0 0 24 24">
+                                <path
+                                    d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z">
+                                </path>
+                            </svg>
+                        </a>
+                        <!-- YouTube -->
+                        <a class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-red-600 hover:text-white transition-all group"
+                            href="#" aria-label="YouTube">
+                            <svg class="w-5 h-5 fill-current transform group-hover:scale-110 transition-transform"
+                                viewBox="0 0 24 24">
+                                <path
+                                    d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z">
+                                </path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                <!-- Column 2 -->
+                <div>
+                    <h3 class="font-bold text-slate-900 dark:text-white mb-6">Explora</h3>
+                    <ul class="space-y-4 text-sm text-slate-600 dark:text-slate-400">
+                        <li><a class="hover:text-primary transition-colors" href="directorio.html">Manifestaciones
+                                Culturales</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="mapa.html">Espacios y Museos</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="directorio.html">Agentes
+                                Culturales</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="novedades.html">Eventos y
+                                Festivales</a></li>
+                    </ul>
+                </div>
+                <!-- Column 3 -->
+                <div>
+                    <h3 class="font-bold text-slate-900 dark:text-white mb-6">Recursos</h3>
+                    <ul class="space-y-4 text-sm text-slate-600 dark:text-slate-400">
+                        <li><a class="hover:text-primary transition-colors" href="documentos.html">Documentos y
+                                Leyes</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="novedades.html">Convocatorias
+                                Abiertas</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="estadisticas.html">Estadísticas
+                                Culturales</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="#">Mapa del Sitio</a></li>
+                    </ul>
+                </div>
+                <!-- Column 4 -->
+                <div>
+                    <h3 class="font-bold text-slate-900 dark:text-white mb-6">Contacto</h3>
+                    <ul class="space-y-4 text-sm text-slate-600 dark:text-slate-400">
+                        <li class="flex items-start gap-3">
+                            <span class="material-symbols-outlined text-primary text-lg">location_on</span>
+                            <span>P.H. Tula, Edificio Grupo Rey,<br />Vía España con vía Argentina.</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-primary text-lg">call</span>
+                            <span>+507 501-4000</span>
+                        </li>
+                        <li class="flex items-center gap-3 hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-primary text-lg">mail</span>
+                            <a href="mailto:info@sicultura.gob.pa">info@sicultura.gob.pa</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <!-- Bottom Footer -->
+            <div
+                class="mt-16 pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="text-sm text-slate-500 dark:text-slate-500">
+                    © 2024 Ministerio de Cultura de Panamá. Todos los derechos reservados.
+                </div>
+                <div class="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-slate-500 dark:text-slate-500">
+                    <a class="hover:text-slate-900 dark:hover:text-white transition-colors" href="#">Privacidad</a>
+                    <a class="hover:text-slate-900 dark:hover:text-white transition-colors" href="#">Términos</a>
+                    <a class="hover:text-slate-900 dark:hover:text-white transition-colors" href="#">Accesibilidad</a>
+                    <a class="hover:text-slate-900 dark:hover:text-white transition-colors"
+                        href="sobre_sicultura.html">Sobre Sicultura</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="fixed inset-0 z-[100] hidden items-center justify-center">
+        <!-- Overlay -->
+        <div id="login-modal-overlay"
+            class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity opacity-0"></div>
+
+        <!-- Modal Dialog -->
+        <div id="login-modal-content"
+            class="relative bg-white dark:bg-surface-dark w-full max-w-md mx-4 rounded-2xl shadow-2xl overflow-hidden transform scale-95 opacity-0 transition-all duration-300 border border-slate-100 dark:border-slate-800">
+            <!-- Close Button -->
+            <button id="login-modal-close"
+                class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+
+            <div class="p-8">
+                <!-- Header with Logo -->
+                <div class="flex flex-col items-center justify-center mb-8">
+                    <img src="logo_micultura.png" alt="Sicultura Panamá Logo" class="h-16 w-auto mb-4 drop-shadow-sm">
+                    <h2 id="modal-title" class="text-2xl font-bold text-slate-900 dark:text-white">Bienvenido</h2>
+                    <p id="modal-subtitle" class="text-slate-500 dark:text-slate-400 text-sm mt-1 text-center">Inicia
+                        sesión para acceder a tu perfil y recursos culturales.</p>
+                </div>
+
+                <!-- Login Form -->
+                <form id="login-form" class="space-y-5 transition-all duration-300">
+                    <div>
+                        <label for="email"
+                            class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Correo
+                            Electrónico</label>
+                        <input type="email" id="email"
+                            class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                            placeholder="tu@correo.com">
+                    </div>
+                    <div id="password-field" class="transition-all duration-300 overflow-hidden">
+                        <div class="flex items-center justify-between mb-1">
+                            <label for="password"
+                                class="block text-sm font-medium text-slate-700 dark:text-slate-300">Contraseña</label>
+                            <a href="#" id="btn-forgot-password"
+                                class="text-sm text-primary hover:text-blue-700 transition-colors font-medium">¿Olvidaste
+                                tu contraseña?</a>
+                        </div>
+                        <input type="password" id="password"
+                            class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                            placeholder="••••••••">
+                    </div>
+
+                    <button type="submit" id="btn-submit"
+                        class="w-full bg-secondary hover:bg-red-800 text-white font-bold rounded-lg px-4 py-3 mt-4 transition-colors shadow-lg shadow-secondary/30">
+                        Iniciar Sesión
+                    </button>
+
+                    <!-- Back to login link (initially hidden) -->
+                    <div id="back-to-login" class="text-center hidden mt-4">
+                        <a href="#"
+                            class="text-sm text-slate-500 dark:text-slate-400 hover:text-primary transition-colors flex items-center justify-center gap-1">
+                            <span class="material-symbols-outlined text-sm">arrow_back</span>
+                            Volver al inicio de sesión
+                        </a>
+                    </div>
+                </form>
+
+                <!-- Footer -->
+                <div id="modal-footer"
+                    class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 text-center transition-all duration-300">
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">¿No tienes cuenta? <button type="button"
+                            id="btn-switch-to-register"
+                            class="text-primary hover:text-blue-700 font-bold ml-1 transition-colors">Regístrate</button>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal (Larger) -->
+    <div id="register-modal" class="fixed inset-0 z-[100] hidden items-center justify-center">
+        <!-- Overlay -->
+        <div id="register-modal-overlay"
+            class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity opacity-0"></div>
+
+        <!-- Modal Dialog (max-w-xl for wider layout) -->
+        <div id="register-modal-content"
+            class="relative bg-white dark:bg-surface-dark w-full max-w-xl mx-4 rounded-2xl shadow-2xl overflow-y-auto max-h-[90vh] transform scale-95 opacity-0 transition-all duration-300 border border-slate-100 dark:border-slate-800">
+            <!-- Close Button -->
+            <button id="register-modal-close"
+                class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+
+            <div class="p-8">
+                <!-- Header with Logo -->
+                <div class="flex flex-col items-center justify-center mb-6">
+                    <img src="logo_micultura.png" alt="Sicultura Panamá Logo" class="h-14 w-auto mb-4 drop-shadow-sm">
+                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Crea tu Cuenta</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm mt-1 text-center">Únete a Sicultura y conecta
+                        con los recursos de Panamá.</p>
+                </div>
+
+                <!-- Register Form -->
+                <form id="register-form" class="space-y-4">
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <label for="reg-name"
+                                class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nombre
+                                completo *</label>
+                            <input type="text" id="reg-name" required
+                                class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                placeholder="Tu nombre completo">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="reg-email"
+                                class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Correo
+                                electrónico *</label>
+                            <input type="email" id="reg-email" required
+                                class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                placeholder="tu@correo.com">
+                        </div>
+                        <div>
+                            <label for="reg-phone"
+                                class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Teléfono
+                                *</label>
+                            <input type="tel" id="reg-phone" required
+                                class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                placeholder="+507 0000-0000">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="reg-password"
+                                class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Contraseña
+                                *</label>
+                            <input type="password" id="reg-password" required
+                                class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                placeholder="••••••••">
+                        </div>
+                        <div>
+                            <label for="reg-password-confirm"
+                                class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Repite la
+                                contraseña *</label>
+                            <input type="password" id="reg-password-confirm" required
+                                class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                placeholder="••••••••">
+                        </div>
+                    </div>
+
+                    <!-- Terms Checkboxes -->
+                    <div class="space-y-3 mt-6 pt-2">
+                        <label class="flex items-start gap-3 cursor-pointer group">
+                            <div class="flex items-center h-5">
+                                <input type="checkbox" required
+                                    class="w-4 h-4 text-primary bg-slate-50 dark:bg-slate-900 border-slate-300 dark:border-slate-600 rounded focus:ring-primary dark:focus:ring-primary dark:ring-offset-slate-800 transition-colors cursor-pointer">
+                            </div>
+                            <span
+                                class="text-xs text-slate-600 dark:text-slate-400 leading-tight group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">
+                                Autorizo al Ministerio de Cultura de Panamá a que recolecte, almacene y trate mis datos
+                                personales, como responsable del Sistema de Información Cultural (Sicultura).
+                            </span>
+                        </label>
+
+                        <label class="flex items-start gap-3 cursor-pointer group">
+                            <div class="flex items-center h-5">
+                                <input type="checkbox" required
+                                    class="w-4 h-4 text-primary bg-slate-50 dark:bg-slate-900 border-slate-300 dark:border-slate-600 rounded focus:ring-primary dark:focus:ring-primary dark:ring-offset-slate-800 transition-colors cursor-pointer">
+                            </div>
+                            <span
+                                class="text-xs text-slate-600 dark:text-slate-400 leading-tight group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">
+                                Confirmo que he leído en plenitud y acepto los Términos y Condiciones para el registro
+                                de fichas en el Directorio de Sicultura.
+                            </span>
+                        </label>
+
+                        <label class="flex items-start gap-3 cursor-pointer group">
+                            <div class="flex items-center h-5">
+                                <input type="checkbox" required
+                                    class="w-4 h-4 text-primary bg-slate-50 dark:bg-slate-900 border-slate-300 dark:border-slate-600 rounded focus:ring-primary dark:focus:ring-primary dark:ring-offset-slate-800 transition-colors cursor-pointer">
+                            </div>
+                            <span
+                                class="text-xs text-slate-600 dark:text-slate-400 leading-tight group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">
+                                Confirmo que he leído y acepto la Política de Protección de Datos Personales de
+                                Sicultura.
+                            </span>
+                        </label>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full bg-secondary hover:bg-red-800 text-white font-bold rounded-lg px-4 py-3 mt-6 transition-colors shadow-lg shadow-secondary/30">
+                        Crear Cuenta
+                    </button>
+                </form>
+
+                <!-- Footer -->
+                <div class="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800 text-center">
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">¿Ya tienes cuenta? <button type="button"
+                            id="btn-switch-to-login"
+                            class="text-primary hover:text-blue-700 font-bold ml-1 transition-colors">Inicia
+                            sesión</button></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Dark Mode Logic ---
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+        // Muestra el icono correcto en carga inicial
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            darkIcon.classList.add('hidden');
+            lightIcon.classList.remove('hidden');
+        } else {
+            document.documentElement.classList.remove('dark');
+            lightIcon.classList.add('hidden');
+            darkIcon.classList.remove('hidden');
+        }
+
+        // Listener para cambiar el modo
+        themeToggleBtn.addEventListener('click', function () {
+            darkIcon.classList.toggle('hidden');
+            lightIcon.classList.toggle('hidden');
+
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        });
+
+        // --- Animaciones al hacer scroll (Intersection Observer) ---
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.15
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target); // Animación de una sola vez
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
+
+        // --- Modal Logic ---
+        const btnLogin = document.getElementById('btn-login');
+        const loginModal = document.getElementById('login-modal');
+        const loginOverlay = document.getElementById('login-modal-overlay');
+        const loginContent = document.getElementById('login-modal-content');
+        const btnCloseModal = document.getElementById('login-modal-close');
+
+        const btnRegister = document.getElementById('btn-register');
+        const registerModal = document.getElementById('register-modal');
+        const registerOverlay = document.getElementById('register-modal-overlay');
+        const registerContent = document.getElementById('register-modal-content');
+        const btnCloseRegisterModal = document.getElementById('register-modal-close');
+
+        const btnSwitchToRegister = document.getElementById('btn-switch-to-register');
+        const btnSwitchToLogin = document.getElementById('btn-switch-to-login');
+
+        // Modal State Elements
+        const passwordField = document.getElementById('password-field');
+        const btnForgotPassword = document.getElementById('btn-forgot-password');
+        const btnSubmit = document.getElementById('btn-submit');
+        const backToLogin = document.getElementById('back-to-login');
+        const modalTitle = document.getElementById('modal-title');
+        const modalSubtitle = document.getElementById('modal-subtitle');
+        const modalFooter = document.getElementById('modal-footer');
+
+        // Reset modal to default login state
+        function resetModalState() {
+            passwordField.style.height = 'auto'; // Revert back to auto to compute height naturally
+            requestAnimationFrame(() => {
+                passwordField.style.opacity = '1';
+                passwordField.style.marginTop = '';
+            });
+
+            btnSubmit.textContent = 'Iniciar Sesión';
+            modalTitle.textContent = 'Bienvenido';
+            modalSubtitle.textContent = 'Inicia sesión para acceder a tu perfil y recursos culturales.';
+
+            backToLogin.classList.add('hidden');
+            modalFooter.classList.remove('hidden');
+        }
+
+        // --- Open/Close Login Modal ---
+        function openLoginModal() {
+            resetModalState();
+            closeRegisterModalInstantly();
+            loginModal.classList.remove('hidden');
+            loginModal.classList.add('flex');
+            // Timeout to allow DOM to update before triggering transition
+            setTimeout(() => {
+                loginOverlay.classList.remove('opacity-0');
+                loginContent.classList.remove('opacity-0', 'scale-95');
+                loginContent.classList.add('opacity-100', 'scale-100');
+            }, 10);
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        function closeLoginModal() {
+            loginOverlay.classList.add('opacity-0');
+            loginContent.classList.remove('opacity-100', 'scale-100');
+            loginContent.classList.add('opacity-0', 'scale-95');
+
+            setTimeout(() => {
+                loginModal.classList.add('hidden');
+                loginModal.classList.remove('flex');
+                document.body.style.overflow = '';
+            }, 300);
+        }
+
+        function closeLoginModalInstantly() {
+            loginOverlay.classList.add('opacity-0');
+            loginContent.classList.remove('opacity-100', 'scale-100');
+            loginContent.classList.add('opacity-0', 'scale-95');
+            loginModal.classList.add('hidden');
+            loginModal.classList.remove('flex');
+        }
+
+        // --- Open/Close Register Modal ---
+        function openRegisterModal() {
+            closeLoginModalInstantly();
+            registerModal.classList.remove('hidden');
+            registerModal.classList.add('flex');
+
+            setTimeout(() => {
+                registerOverlay.classList.remove('opacity-0');
+                registerContent.classList.remove('opacity-0', 'scale-95');
+                registerContent.classList.add('opacity-100', 'scale-100');
+            }, 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeRegisterModal() {
+            registerOverlay.classList.add('opacity-0');
+            registerContent.classList.remove('opacity-100', 'scale-100');
+            registerContent.classList.add('opacity-0', 'scale-95');
+
+            setTimeout(() => {
+                registerModal.classList.add('hidden');
+                registerModal.classList.remove('flex');
+                document.body.style.overflow = '';
+            }, 300);
+        }
+
+        function closeRegisterModalInstantly() {
+            registerOverlay.classList.add('opacity-0');
+            registerContent.classList.remove('opacity-100', 'scale-100');
+            registerContent.classList.add('opacity-0', 'scale-95');
+            registerModal.classList.add('hidden');
+            registerModal.classList.remove('flex');
+        }
+
+        // --- Event Listeners ---
+        btnLogin.addEventListener('click', openLoginModal);
+        btnCloseModal.addEventListener('click', closeLoginModal);
+        loginOverlay.addEventListener('click', closeLoginModal);
+
+        btnRegister.addEventListener('click', openRegisterModal);
+        btnCloseRegisterModal.addEventListener('click', closeRegisterModal);
+        registerOverlay.addEventListener('click', closeRegisterModal);
+
+        btnSwitchToRegister.addEventListener('click', openRegisterModal);
+        btnSwitchToLogin.addEventListener('click', openLoginModal);
+
+        // Forgot password logic
+        btnForgotPassword.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            // Smoothly hide password field
+            passwordField.style.height = '0px';
+            passwordField.style.opacity = '0';
+            passwordField.style.marginTop = '0';
+
+            // Update texts
+            modalTitle.textContent = 'Bienvenido';
+            modalSubtitle.textContent = 'Ingresa tu correo asociado para enviarte las instrucciones de recuperación.';
+            btnSubmit.textContent = 'Enviar Enlace';
+
+            // Toggle visibility of helper links
+            backToLogin.classList.remove('hidden');
+            modalFooter.classList.add('hidden');
+        });
+
+        // Back to login logic
+        backToLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            resetModalState();
+        });
+
+        // Prevent form submission redirecting
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+        });
+        document.getElementById('register-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (!loginModal.classList.contains('hidden')) closeLoginModal();
+                if (!registerModal.classList.contains('hidden')) closeRegisterModal();
+            }
+        });
+        // --- Search Bar Logic ---
+        const heroSearchInput = document.getElementById('hero-search-input');
+        const heroSearchBtn = document.getElementById('hero-search-btn');
+
+        function performHeroSearch() {
+            const query = heroSearchInput.value.trim();
+            if (query) {
+                // Redirigir a directorio.html con el parámetro de búsqueda
+                window.location.href = `directorio.html?q=${encodeURIComponent(query)}`;
+            }
+        }
+
+        if (heroSearchBtn && heroSearchInput) {
+            heroSearchBtn.addEventListener('click', performHeroSearch);
+            heroSearchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    performHeroSearch();
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
