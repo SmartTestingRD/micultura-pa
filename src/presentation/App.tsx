@@ -3,11 +3,10 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import Dashboard from './pages/Dashboard';
 
-
 const Login: React.FC = () => {
     const [email, setEmail] = useState('admin@cultura.gob.pa');
     const [password, setPassword] = useState('admin');
-    const { login } = useAuth();
+    const { adminLogin } = useAuth();
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -16,54 +15,77 @@ const Login: React.FC = () => {
         setLoading(true);
         setError('');
         try {
-            await login({ email, password });
+            await adminLogin({ email, password });
         } catch {
-            setError('Invalid credentials');
+            setError('Credenciales inválidas');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen grid place-items-center bg-slate-50 text-slate-800">
-            <div className="w-full max-w-md p-8 bg-white rounded-2xl shadow-sm border border-slate-100">
-                <h2 className="text-2xl font-bold text-center mb-8">System Login</h2>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Email</label>
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                        />
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+            <div className="relative bg-white dark:bg-surface-dark w-full max-w-md mx-4 rounded-2xl shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-800 flex flex-col">
+                <div className="p-8">
+                    <div className="flex flex-col items-center justify-center mb-8">
+                        <img src="/logo_micultura.png" alt="Sicultura Panamá Logo" className="h-16 w-auto mb-4 drop-shadow-sm" />
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Bienvenido</h2>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 text-center">
+                            Inicia sesión para acceder al sistema administrativo.
+                        </p>
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Password</label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                        />
-                    </div>
-                    {error && <p className="text-red-500 text-sm">{error}</p>}
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full bg-indigo-600 text-white font-medium py-2.5 rounded-xl mt-4 hover:bg-indigo-700 transition"
-                    >
-                        {loading ? 'Authenticating...' : 'Sign In'}
-                    </button>
-                </form>
+
+                    {error && (
+                        <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm text-center border border-red-100">
+                            {error}
+                        </div>
+                    )}
+
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                        <div className="flex flex-col gap-1">
+                            <label htmlFor="admin-email" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                Correo Electrónico *
+                            </label>
+                            <input
+                                type="email"
+                                id="admin-email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                disabled={loading}
+                                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-primary transition-colors disabled:opacity-60"
+                                placeholder="tu@correo.com"
+                                required
+                            />
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                            <label htmlFor="admin-password" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                Contraseña *
+                            </label>
+                            <input
+                                type="password"
+                                id="admin-password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                disabled={loading}
+                                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary focus:border-primary transition-colors disabled:opacity-60"
+                                placeholder="••••••••"
+                                required
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={loading || !email || !password}
+                            className="w-full bg-secondary hover:bg-red-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold rounded-lg px-4 py-3 mt-4 transition-colors shadow-lg shadow-secondary/30"
+                        >
+                            {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     );
-};
-
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-    const { isAuthenticated } = useAuth();
-    return isAuthenticated ? children : <Login />;
 };
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
@@ -75,6 +97,21 @@ import MapPage from './pages/MapPage';
 import News from './pages/News';
 import About from './pages/About';
 import { BackofficeHome } from './pages/backoffice/Home';
+import { ReviewProfiles } from './pages/backoffice/ReviewProfiles';
+
+const CitizenRoute = ({ children }: { children: React.ReactNode }) => {
+    const { isAuthenticated, isAdmin } = useAuth();
+    if (!isAuthenticated) return <Navigate to="/" replace />;
+    if (isAdmin) return <Navigate to="/admin" replace />;
+    return children;
+};
+
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+    const { isAuthenticated, isAdmin } = useAuth();
+    if (!isAuthenticated) return <Login />;
+    if (!isAdmin) return <Navigate to="/portal" replace />;
+    return children;
+};
 
 export default function App() {
     return (
@@ -92,7 +129,6 @@ export default function App() {
                         <Route path="/novedades.html" element={<News />} />
                         <Route path="/sobre_sicultura.html" element={<About />} />
 
-                        {/* Backward compatibility for friendly URLs */}
                         <Route path="/directorio" element={<Directory />} />
                         <Route path="/documentos" element={<Documents />} />
                         <Route path="/estadisticas" element={<Statistics />} />
@@ -100,23 +136,36 @@ export default function App() {
                         <Route path="/novedades" element={<News />} />
                         <Route path="/sobre" element={<About />} />
 
-                        {/* Admin/Protected Routes */}
+                        {/* Citizen Dashboard Routes */}
                         <Route
-                            path="/admin"
+                            path="/portal"
                             element={
-                                <ProtectedRoute>
+                                <CitizenRoute>
                                     <Dashboard />
-                                </ProtectedRoute>
+                                </CitizenRoute>
                             }
                         />
 
-                        {/* Backoffice Route */}
+                        {/* Admin/Backoffice Routes */}
                         <Route
-                            path="/backoffice"
-                            element={<BackofficeHome />}
+                            path="/admin/*"
+                            element={
+                                <AdminRoute>
+                                    <Routes>
+                                        <Route path="" element={<BackofficeHome />} />
+                                        <Route path="profiles/pending" element={<ReviewProfiles />} />
+                                    </Routes>
+                                </AdminRoute>
+                            }
                         />
 
-                        {/* Catch all route - can be modified later to 404 */}
+
+                        <Route
+                            path="/backoffice"
+                            element={<Navigate to="/admin" replace />}
+                        />
+
+                        {/* Catch all route */}
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                 </BrowserRouter>
@@ -124,4 +173,3 @@ export default function App() {
         </AuthProvider>
     );
 }
-

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 interface RegistrationModalProps {
     isOpen: boolean;
@@ -8,6 +9,8 @@ interface RegistrationModalProps {
 
 export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose }) => {
     const navigate = useNavigate();
+    const { setSession } = useAuth();
+
     const [otpSent, setOtpSent] = useState(false);
     const [countdown, setCountdown] = useState(300); // 5 minutes in seconds
     const [emailStr, setEmailStr] = useState('');
@@ -176,13 +179,15 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
             const data = await response.json();
 
             // OTP Validated! 
-            if (data.token) {
-                localStorage.setItem('sicultura_jwt', data.token);
+            if (data.token && data.user) {
+                setSession(data.token, data.user);
+            } else if (data.token) {
+                setSession(data.token, { role: 'citizen' } as any);
             }
 
-            alert("¡Registro exitoso! Tu cuenta ha sido creada y validada correctamente. Ya puedes iniciar sesión en el sistema.");
+            alert("¡Registro exitoso! Tu cuenta ha sido creada y validada correctamente.");
             onClose();
-            navigate('/backoffice');
+            navigate('/portal');
 
         } catch (error: any) {
             console.error('Error validating OTP:', error);

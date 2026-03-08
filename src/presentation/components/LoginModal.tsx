@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 interface LoginModalProps {
     isOpen: boolean;
@@ -9,6 +10,7 @@ interface LoginModalProps {
 
 export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitchToRegister }) => {
     const navigate = useNavigate();
+    const { setSession } = useAuth();
 
     const [emailStr, setEmailStr] = useState<string>('');
     const [otpCode, setOtpCode] = useState<string>('');
@@ -127,12 +129,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onSwitc
 
             const data = await response.json();
 
-            if (data.token) {
-                localStorage.setItem('sicultura_jwt', data.token);
+            if (data.token && data.user) {
+                setSession(data.token, data.user);
+            } else if (data.token) {
+                setSession(data.token, { role: 'citizen' } as any);
             }
 
             onClose();
-            navigate('/backoffice');
+            navigate('/portal');
 
         } catch (error: any) {
             console.error('Error validating login OTP:', error);

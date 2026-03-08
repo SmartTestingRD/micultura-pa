@@ -9,6 +9,9 @@ import otpGenerateHandler from '../../api/otp/generate';
 import otpValidateHandler from '../../api/otp/validate';
 
 import catalogsHandler from '../../api/catalogs/index';
+import adminLoginHandler from '../../api/auth/admin-login';
+import pendingProfilesHandler from '../../api/backoffice/profiles/pending';
+import reviewProfilesHandler from '../../api/backoffice/profiles/review';
 
 dotenv.config();
 
@@ -31,6 +34,10 @@ app.post('/api/login/validate', (req, res) => {
     const handler = (loginValidateHandler as any).default || loginValidateHandler;
     return handler(req, res);
 });
+app.post('/api/auth/admin-login', (req, res) => {
+    const handler = (adminLoginHandler as any).default || adminLoginHandler;
+    return handler(req, res);
+});
 app.post('/api/proxy', (req, res) => {
     const handler = (proxyHandler as any).default || proxyHandler;
     return handler(req, res);
@@ -45,6 +52,16 @@ app.post('/api/otp/validate', (req, res) => {
 });
 app.get('/api/catalogs', (req, res) => {
     const handler = (catalogsHandler as any).default || catalogsHandler;
+    return handler(req, res);
+});
+
+// Backoffice Routes
+app.get('/api/backoffice/profiles/pending', (req, res) => {
+    const handler = (pendingProfilesHandler as any).default || pendingProfilesHandler;
+    return handler(req, res);
+});
+app.post('/api/backoffice/profiles/review', (req, res) => {
+    const handler = (reviewProfilesHandler as any).default || reviewProfilesHandler;
     return handler(req, res);
 });
 

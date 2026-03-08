@@ -1,74 +1,65 @@
-import { useState } from 'react';
-import { useProxy } from '../hooks/useProxy';
+import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import { ShieldAlert, LogOut, ExternalLink, Loader2 } from 'lucide-react';
+import { HeaderPortal } from '../components/portal/HeaderPortal';
 
 export default function Dashboard() {
-    const { user, logout } = useAuth();
-    const { fetchExternalProxy, loading, error } = useProxy();
-    const [proxyData, setProxyData] = useState<unknown>(null);
-
-    const handleTestProxy = async () => {
-        // Testing the proxy to an external API (avoiding CORS and keeping keys safe)
-        const data = await fetchExternalProxy('https://jsonplaceholder.typicode.com/posts/1');
-        setProxyData(data);
-    };
+    const { user } = useAuth();
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-800 p-8 font-sans">
-            <div className="max-w-4xl mx-auto space-y-6">
+        <div className="min-h-screen bg-slate-50 flex flex-col">
+            <HeaderPortal />
 
-                <header className="flex items-center justify-between p-6 bg-white rounded-2xl shadow-sm border border-slate-100">
-                    <div>
-                        <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">MinCultura Dashboard</h1>
-                        <p className="text-slate-500 mt-1">Gobernanza Corporativa SPA Baseline.</p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <span className="text-sm font-medium text-slate-600 px-3 py-1 bg-slate-100 rounded-full">
-                            {user?.email} ({user?.role})
-                        </span>
-                        <button
-                            onClick={logout}
-                            className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                        >
-                            <LogOut size={16} /> Logout
-                        </button>
-                    </div>
-                </header>
-
-                <main className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="p-6 bg-white rounded-2xl shadow-sm border border-slate-100">
-                        <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
-                            <ShieldAlert className="text-indigo-500" />
-                            Serverless Proxy Test
-                        </h2>
-                        <p className="text-sm text-slate-600 mb-6">
-                            Use the local proxy Serverless Function to call external APIs without CORS errors.
-                        </p>
-                        <button
-                            onClick={handleTestProxy}
-                            disabled={loading}
-                            className="w-full flex justify-center items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 px-4 rounded-xl font-medium transition-all shadow-sm disabled:opacity-70 cursor-pointer"
-                        >
-                            {loading ? <Loader2 className="animate-spin" size={18} /> : <ExternalLink size={18} />}
-                            Fetch External JSON
-                        </button>
-
-                        {error && (
-                            <div className="mt-4 p-4 bg-red-50 text-red-700 text-sm rounded-xl border border-red-100">
-                                {error}
-                            </div>
-                        )}
+            <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-6">
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 min-h-[60vh] flex flex-col items-center justify-center text-center animate-fade-in-up">
+                    <div className="bg-blue-50 text-blue-600 w-20 h-20 rounded-full flex items-center justify-center mb-6">
+                        <span className="material-symbols-outlined text-4xl">travel_explore</span>
                     </div>
 
-                    <div className="p-6 bg-slate-900 rounded-2xl shadow-md text-emerald-400 overflow-hidden">
-                        <h3 className="text-sm font-semibold mb-3 text-slate-400">Proxy Output:</h3>
-                        <pre className="text-xs font-mono overflow-auto h-48 scrollbar-thin scrollbar-thumb-slate-700">
-                            {proxyData ? JSON.stringify(proxyData, null, 2) : '// No proxy data yet...'}
-                        </pre>
+                    <h1 className="text-3xl font-bold text-slate-900 mb-2">Bienvenido, {user?.full_name || 'Ciudadano'}</h1>
+                    <p className="text-slate-500 text-lg max-w-lg mx-auto">
+                        Has iniciado sesión correctamente en el Portal Ciudadano. Desde aquí podrás gestionar tus perfiles públicos y acceder a los recursos del Ministerio de Cultura.
+                    </p>
+
+                    <div className="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-4xl text-left">
+                        {/* Placeholder Cards */}
+                        <div className="p-6 border border-slate-100 rounded-xl hover:shadow-md transition-shadow cursor-pointer bg-white group">
+                            <h3 className="font-bold text-slate-800 mb-2 flex items-center gap-2 group-hover:text-primary transition-colors">
+                                <span className="material-symbols-outlined text-primary">person_check</span>
+                                Mi Perfil Público
+                            </h3>
+                            <p className="text-sm text-slate-500">
+                                Revisa el estado de aprobación de tu perfil de Artista, Gestor o Espacio Cultural.
+                            </p>
+                        </div>
+
+                        <div className="p-6 border border-slate-100 rounded-xl hover:shadow-md transition-shadow cursor-pointer bg-white group">
+                            <h3 className="font-bold text-slate-800 mb-2 flex items-center gap-2 group-hover:text-primary transition-colors">
+                                <span className="material-symbols-outlined text-primary">campaign</span>
+                                Convocatorias
+                            </h3>
+                            <p className="text-sm text-slate-500">
+                                Explora y postúlate a las últimas convocatorias, becas y fondos concursables.
+                            </p>
+                        </div>
+
+                        <div className="p-6 border border-slate-100 rounded-xl hover:shadow-md transition-shadow cursor-pointer bg-white group">
+                            <h3 className="font-bold text-slate-800 mb-2 flex items-center gap-2 group-hover:text-primary transition-colors">
+                                <span className="material-symbols-outlined text-primary">support_agent</span>
+                                Soporte
+                            </h3>
+                            <p className="text-sm text-slate-500">
+                                ¿Necesitas ayuda con tu registro? Escríbenos o consulta las preguntas frecuentes.
+                            </p>
+                        </div>
                     </div>
-                </main>
-            </div>
+                </div>
+            </main>
+
+            <footer className="bg-white border-t border-slate-200 py-6 mt-auto">
+                <div className="max-w-7xl mx-auto px-4 text-center text-sm text-slate-500">
+                    &copy; {new Date().getFullYear()} Sistema de Información Cultural (Sicultura) - Portal Ciudadano
+                </div>
+            </footer>
         </div>
     );
 }
