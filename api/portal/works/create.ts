@@ -1,5 +1,6 @@
-import { VercelResponse } from '@vercel/node';
-import { requireAuth, AuthenticatedRequest } from '../../_lib/middleware/auth';
+import type { VercelResponse } from '@vercel/node';
+import { requireAuth } from '../../_lib/middleware/auth';
+import type { AuthenticatedRequest } from '../../_lib/middleware/auth';
 import db from '../../_lib/data/db';
 
 export default requireAuth(async (req: AuthenticatedRequest, res: VercelResponse) => {
@@ -113,6 +114,22 @@ export default requireAuth(async (req: AuthenticatedRequest, res: VercelResponse
                  `;
             await db.query(mediaQuery, [newEntityId, imageUrl]);
         }
+        // Log creation in Audit Table
+        const auditQuery = `
+                INSERT INTO min_cultura.cultural_entities_audit_log (
+                    entity_id, action_type, new_status, performer_role, performed_by_email, changes_summary
+                ) VALUES (
+                    $1, 'PROFILE_CREATED', $2, $3, $4, $5
+                )
+            `;
+        const auditValues = [
+            newEntityId,
+            status || 'DRAFT',
+            user.role,
+            user.email,
+            JSON.stringify({ note: 'Initial registration from Citizen Portal' })
+        ];
+        await db.query(auditQuery, auditValues);
 
         return res.status(201).json({
             message: 'Registro de obra o ficha exitoso.',
