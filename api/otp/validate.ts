@@ -16,7 +16,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const {
             otpId, email, otpCode,
             full_name, phone_number,
-            authorizes_data_treatment, accepts_terms_conditions, accepts_privacy_policy
+            authorizes_data_treatment, accepts_terms_conditions, accepts_privacy_policy,
+            profile_type, profile_name
         } = body || {};
 
         if (!otpId || !email || !otpCode || !full_name) {
@@ -83,6 +84,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 Boolean(accepts_terms_conditions),
                 Boolean(accepts_privacy_policy)
             ]);
+        }
+
+        // Create cultural profile if requested
+        if (profile_type && profile_type !== 'CITIZEN' && profile_name) {
+            try {
+                const profileInsertQuery = `
+                    INSERT INTO min_cultura.cultural_entities (
+                        entity_type, name, status, citizen_id
+                    ) 
+                    VALUES ($1, $2, 'DRAFT', $3)
+                `;
+                await query(profileInsertQuery, [
+                    profile_type,
+                    profile_name,
+                    citizenId
+                ]);
+            } catch (profileError) {
+                console.error('Error creating initial cultural profile:', profileError);
+                // We don't block the whole registration if profile creation fails, 
+                // but we log it. The citizen was already created successfully.
+            }
         }
 
         const tokenPayload = {

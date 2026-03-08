@@ -18,11 +18,15 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
     const [acceptTerms, setAcceptTerms] = useState(false);
     const [acceptPrivacy, setAcceptPrivacy] = useState(false);
 
+    // New Profile Fields
+    const [profileType, setProfileType] = useState('CITIZEN'); // CITIZEN, CULTURAL_AGENT, SPACE
+    const [profileName, setProfileName] = useState('');
+
     const [otpId, setOtpId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-    const isFormValid = otpSent && Boolean(fullName.trim()) && otpCode.length === 6 && acceptData && acceptTerms && acceptPrivacy;
+    const isFormValid = otpSent && Boolean(fullName.trim()) && otpCode.length === 6 && acceptData && acceptTerms && acceptPrivacy && (profileType === 'CITIZEN' || Boolean(profileName.trim()));
 
     useEffect(() => {
         let timer: NodeJS.Timeout;
@@ -103,7 +107,9 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                     phone_number: phoneNumber,
                     authorizes_data_treatment: acceptData,
                     accepts_terms_conditions: acceptTerms,
-                    accepts_privacy_policy: acceptPrivacy
+                    accepts_privacy_policy: acceptPrivacy,
+                    profile_type: profileType,
+                    profile_name: profileName
                 }),
             });
 
@@ -228,6 +234,41 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                                         placeholder="000000" />
                                     <p className="text-xs text-slate-500 mt-1">Ingresa el código que hemos enviado a tu correo/teléfono.</p>
                                 </div>
+                            </div>
+                        )}
+
+                        {otpSent && (
+                            <div className="grid grid-cols-1 gap-4 mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+                                <div>
+                                    <label htmlFor="reg-profile" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                        ¿Deseas crear un perfil cultural de inmediato?
+                                    </label>
+                                    <select
+                                        id="reg-profile"
+                                        value={profileType}
+                                        onChange={(e) => setProfileType(e.target.value)}
+                                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                    >
+                                        <option value="CITIZEN">No por ahora (Solo cuenta ciudadana)</option>
+                                        <option value="CULTURAL_AGENT">Sí, como Agente Cultural (Artista, Gestor)</option>
+                                        <option value="SPACE">Sí, como Espacio Cultural (Museo, Teatro, Academia)</option>
+                                    </select>
+                                </div>
+
+                                {profileType !== 'CITIZEN' && (
+                                    <div className="animate-fade-in-up">
+                                        <label htmlFor="reg-profile-name" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                            Nombre {profileType === 'SPACE' ? 'del Espacio o Museo' : 'Artístico o de la Agrupación'} *
+                                        </label>
+                                        <input type="text" id="reg-profile-name" required={profileType !== 'CITIZEN'}
+                                            value={profileName} onChange={(e) => setProfileName(e.target.value)}
+                                            className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                            placeholder="P. Ej. Teatro Nacional" />
+                                        <p className="text-xs text-slate-500 mt-1">
+                                            Este perfil ingresará al sistema en estado de <b>revisión (oculto)</b> hasta ser aprobado.
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         )}
 
