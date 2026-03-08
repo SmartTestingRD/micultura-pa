@@ -22,11 +22,43 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
     const [profileType, setProfileType] = useState('CITIZEN'); // CITIZEN, CULTURAL_AGENT, SPACE
     const [profileName, setProfileName] = useState('');
 
+    // Legacy Metadata Fields
+    const [agentSubcategory, setAgentSubcategory] = useState('');
+    const [agentStartYear, setAgentStartYear] = useState('');
+    const [agentStudiesLevel, setAgentStudiesLevel] = useState('');
+    const [agentInstagram, setAgentInstagram] = useState('');
+    const [agentFacebook, setAgentFacebook] = useState('');
+
+    const [spaceCapacity, setSpaceCapacity] = useState('');
+    const [spaceManagementType, setSpaceManagementType] = useState('');
+    const [spaceAccessType, setSpaceAccessType] = useState('');
+    const [spacePaymentScheme, setSpacePaymentScheme] = useState('');
+    const [spaceHistoricalHeritage, setSpaceHistoricalHeritage] = useState(false);
+
     const [otpId, setOtpId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-    const isFormValid = otpSent && Boolean(fullName.trim()) && otpCode.length === 6 && acceptData && acceptTerms && acceptPrivacy && (profileType === 'CITIZEN' || Boolean(profileName.trim()));
+    const isAgentValid = profileType === 'CULTURAL_AGENT' ? Boolean(agentSubcategory && agentStartYear && agentStudiesLevel) : true;
+    const isSpaceValid = profileType === 'SPACE' ? Boolean(spaceCapacity && spaceManagementType && spaceAccessType && spacePaymentScheme) : true;
+
+    const [currentStep, setCurrentStep] = useState(1);
+
+    const isStep1Valid = Boolean(fullName.trim()) && acceptData && acceptTerms && acceptPrivacy && (profileType === 'CITIZEN' || (Boolean(profileName.trim()) && isAgentValid && isSpaceValid));
+    const isEmailValid = Boolean(emailStr) && RegExp('[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}').test(emailStr);
+    const isStep2Valid = otpSent && otpCode.length === 6;
+
+    // Dynamic Catalogs State
+    const [catalogs, setCatalogs] = useState<Record<string, { value: string, label: string }[]>>({});
+
+    useEffect(() => {
+        if (isOpen && Object.keys(catalogs).length === 0) {
+            fetch('/api/catalogs')
+                .then(res => res.json())
+                .then(data => setCatalogs(data))
+                .catch(err => console.error("Error fetching catalogs", err));
+        }
+    }, [isOpen]);
 
     useEffect(() => {
         let timer: NodeJS.Timeout;
@@ -84,10 +116,10 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
         return `${m}:${s.toString().padStart(2, '0')}`;
     };
 
-    const handleRegistrationSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleRegistrationSubmit = async (e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
 
-        if (!isFormValid) {
+        if (!isStep1Valid || !isStep2Valid) {
             setErrorMsg("Por favor, completa todos los campos requeridos correctamente.");
             return;
         }
@@ -109,7 +141,24 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                     accepts_terms_conditions: acceptTerms,
                     accepts_privacy_policy: acceptPrivacy,
                     profile_type: profileType,
-                    profile_name: profileName
+                    profile_name: profileName,
+                    profile_metadata: profileType === 'CULTURAL_AGENT'
+                        ? {
+                            sic_subcategory: agentSubcategory,
+                            sic_activities_start_year: agentStartYear,
+                            sic_studies_level: agentStudiesLevel,
+                            sic_contact_instagram: agentInstagram,
+                            sic_contact_facebook: agentFacebook
+                        }
+                        : profileType === 'SPACE'
+                            ? {
+                                sic_capacity: spaceCapacity,
+                                sic_spaces_management_type: spaceManagementType,
+                                sic_access_type: spaceAccessType,
+                                sic_payment_scheme: spacePaymentScheme,
+                                sic_historical_heritage_property: spaceHistoricalHeritage
+                            }
+                            : {}
                 }),
             });
 
@@ -175,71 +224,31 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                         </div>
                     )}
 
-                    <form className="space-y-4" onSubmit={handleRegistrationSubmit}>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label htmlFor="reg-name" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nombre completo *</label>
-                                <input type="text" id="reg-name" name="full_name" required
-                                    value={fullName} onChange={(e) => setFullName(e.target.value)}
-                                    disabled={otpSent}
-                                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-colors disabled:opacity-60"
-                                    placeholder="Tu nombre completo" />
-                            </div>
-                            <div>
-                                <label htmlFor="reg-phone" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Teléfono (Opcional)</label>
-                                <input type="tel" id="reg-phone" name="phone_number"
-                                    value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)}
-                                    disabled={otpSent}
-                                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-colors disabled:opacity-60"
-                                    placeholder="+507 0000-0000" />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-4">
-                            <div>
-                                <label htmlFor="reg-email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Correo electrónico *</label>
-                                <div className="flex gap-2">
-                                    <input type="email" id="reg-email" name="email" required
-                                        value={emailStr}
-                                        onChange={(e) => setEmailStr(e.target.value)}
-                                        pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
-                                        title="Por favor ingrese un correo válido (ejemplo: usuario@dominio.com)"
-                                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
-                                        placeholder="tu@correo.com" />
-                                    <button
-                                        type="button"
-                                        onClick={handleValidateEmail}
-                                        disabled={isLoading || (otpSent && countdown > 0)}
-                                        className="bg-primary hover:bg-blue-600 disabled:bg-slate-400 text-white px-6 py-2.5 rounded-lg text-sm font-bold transition-colors whitespace-nowrap"
-                                    >
-                                        {isLoading ? 'Enviando...' : 'Validar'}
-                                    </button>
+                    <div className="overflow-hidden relative w-full pb-2">
+                        <div
+                            className="flex transition-transform duration-500 ease-in-out w-[200%]"
+                            style={{ transform: `translateX(-${(currentStep - 1) * 50}%)` }}
+                        >
+                            {/* ---- SLIDE 1: Información Personal y Perfil ---- */}
+                            <div className="w-1/2 flex-shrink-0 px-2 flex flex-col space-y-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label htmlFor="reg-name" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nombre completo *</label>
+                                        <input type="text" id="reg-name" name="full_name" required
+                                            value={fullName} onChange={(e) => setFullName(e.target.value)}
+                                            className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                            placeholder="Tu nombre completo" />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="reg-phone" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Teléfono (Opcional)</label>
+                                        <input type="tel" id="reg-phone" name="phone_number"
+                                            value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)}
+                                            className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                            placeholder="+507 0000-0000" />
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        {/* OTP Field replacing Passwords */}
-                        {otpSent && (
-                            <div className="grid grid-cols-1 gap-4">
-                                <div>
-                                    <label htmlFor="reg-otp" className="flex justify-between items-center text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                        <span>Código de Seguridad (OTP) *</span>
-                                        <span className={`font-bold font-mono ${countdown > 60 ? 'text-primary' : 'text-secondary'}`}>
-                                            {formatTime(countdown)}
-                                        </span>
-                                    </label>
-                                    <input type="text" id="reg-otp" name="otp_code" required maxLength={6}
-                                        value={otpCode} onChange={(e) => setOtpCode(e.target.value)}
-                                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-center tracking-widest font-bold text-lg"
-                                        placeholder="000000" />
-                                    <p className="text-xs text-slate-500 mt-1">Ingresa el código que hemos enviado a tu correo/teléfono.</p>
-                                </div>
-                            </div>
-                        )}
-
-                        {otpSent && (
-                            <div className="grid grid-cols-1 gap-4 mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
-                                <div>
+                                <div className="pt-2">
                                     <label htmlFor="reg-profile" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                                         ¿Deseas crear un perfil cultural de inmediato?
                                     </label>
@@ -256,62 +265,216 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
                                 </div>
 
                                 {profileType !== 'CITIZEN' && (
-                                    <div className="animate-fade-in-up">
-                                        <label htmlFor="reg-profile-name" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                            Nombre {profileType === 'SPACE' ? 'del Espacio o Museo' : 'Artístico o de la Agrupación'} *
-                                        </label>
-                                        <input type="text" id="reg-profile-name" required={profileType !== 'CITIZEN'}
-                                            value={profileName} onChange={(e) => setProfileName(e.target.value)}
-                                            className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
-                                            placeholder="P. Ej. Teatro Nacional" />
-                                        <p className="text-xs text-slate-500 mt-1">
-                                            Este perfil ingresará al sistema en estado de <b>revisión (oculto)</b> hasta ser aprobado.
-                                        </p>
+                                    <div className="animate-fade-in-up space-y-4">
+                                        <div>
+                                            <label htmlFor="reg-profile-name" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                                Nombre {profileType === 'SPACE' ? 'del Espacio o Museo' : 'Artístico o de la Agrupación'} *
+                                            </label>
+                                            <input type="text" id="reg-profile-name" required={profileType !== 'CITIZEN'}
+                                                value={profileName} onChange={(e) => setProfileName(e.target.value)}
+                                                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                                                placeholder="P. Ej. Teatro Nacional" />
+                                        </div>
+
+                                        {profileType === 'CULTURAL_AGENT' && (
+                                            <>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Subcategoría *</label>
+                                                        <input type="text" required value={agentSubcategory} onChange={(e) => setAgentSubcategory(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5" placeholder="Ej. Pintor, Músico" />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Año de Inicio *</label>
+                                                        <input type="number" required value={agentStartYear} onChange={(e) => setAgentStartYear(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5" placeholder="Ej. 2015" />
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Nivel de Estudios *</label>
+                                                    <select required value={agentStudiesLevel} onChange={(e) => setAgentStudiesLevel(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5">
+                                                        <option value="">Seleccione...</option>
+                                                        {catalogs['STUDIES_LEVEL']?.map(item => (
+                                                            <option key={item.value} value={item.value}>{item.label}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Instagram (@)</label>
+                                                        <input type="text" value={agentInstagram} onChange={(e) => setAgentInstagram(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5" placeholder="@usuario" />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Facebook</label>
+                                                        <input type="text" value={agentFacebook} onChange={(e) => setAgentFacebook(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5" placeholder="/pagina" />
+                                                    </div>
+                                                </div>
+                                            </>
+                                        )}
+
+                                        {profileType === 'SPACE' && (
+                                            <>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Capacidad (Aforo) *</label>
+                                                        <input type="number" required value={spaceCapacity} onChange={(e) => setSpaceCapacity(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5" placeholder="Ej. 100" />
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Tipo de Gestión *</label>
+                                                        <select required value={spaceManagementType} onChange={(e) => setSpaceManagementType(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5">
+                                                            <option value="">Seleccione...</option>
+                                                            {catalogs['SPACE_MANAGEMENT_TYPE']?.map(item => (
+                                                                <option key={item.value} value={item.value}>{item.label}</option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Tipo de Acceso *</label>
+                                                        <select required value={spaceAccessType} onChange={(e) => setSpaceAccessType(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5">
+                                                            <option value="">Seleccione...</option>
+                                                            {catalogs['SPACE_ACCESS_TYPE']?.map(item => (
+                                                                <option key={item.value} value={item.value}>{item.label}</option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Esquema de Pago *</label>
+                                                        <select required value={spacePaymentScheme} onChange={(e) => setSpacePaymentScheme(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5">
+                                                            <option value="">Seleccione...</option>
+                                                            {catalogs['SPACE_PAYMENT_SCHEME']?.map(item => (
+                                                                <option key={item.value} value={item.value}>{item.label}</option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <label className="flex items-center gap-2 mt-2">
+                                                    <input type="checkbox" checked={spaceHistoricalHeritage} onChange={(e) => setSpaceHistoricalHeritage(e.target.checked)} className="rounded border-slate-300 dark:border-slate-600 dark:bg-slate-800" />
+                                                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Es Patrimonio Histórico</span>
+                                                </label>
+                                            </>
+                                        )}
+
+                                        <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                                            <p className="text-xs text-blue-700 dark:text-blue-300">
+                                                Al completar este registro, tu perfil ingresará al sistema en estado de <b>revisión (oculto)</b> hasta ser aprobado por el Ministerio.
+                                            </p>
+                                        </div>
                                     </div>
                                 )}
+
+                                <div className="space-y-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                                    <label htmlFor="reg-auth-data" className="flex items-start gap-3 cursor-pointer group">
+                                        <div className="flex items-center h-5">
+                                            <input type="checkbox" id="reg-auth-data" name="authorizes_data_treatment" required
+                                                checked={acceptData} onChange={(e) => setAcceptData(e.target.checked)}
+                                                className="w-4 h-4 text-primary bg-slate-50 dark:bg-slate-900 border-slate-300 dark:border-slate-600 rounded focus:ring-primary transition-colors cursor-pointer" />
+                                        </div>
+                                        <span className="text-xs text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">
+                                            Autorizo al Ministerio a que recolecte, almacene y trate mis datos personales.
+                                        </span>
+                                    </label>
+
+                                    <label htmlFor="reg-accept-terms" className="flex items-start gap-3 cursor-pointer group">
+                                        <div className="flex items-center h-5">
+                                            <input type="checkbox" id="reg-accept-terms" name="accepts_terms_conditions" required
+                                                checked={acceptTerms} onChange={(e) => setAcceptTerms(e.target.checked)}
+                                                className="w-4 h-4 text-primary bg-slate-50 dark:bg-slate-900 border-slate-300 dark:border-slate-600 rounded focus:ring-primary transition-colors cursor-pointer" />
+                                        </div>
+                                        <span className="text-xs text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">
+                                            Confirmo que he leído y acepto los Términos y Condiciones.
+                                        </span>
+                                    </label>
+
+                                    <label htmlFor="reg-accept-privacy" className="flex items-start gap-3 cursor-pointer group">
+                                        <div className="flex items-center h-5">
+                                            <input type="checkbox" id="reg-accept-privacy" name="accepts_privacy_policy" required
+                                                checked={acceptPrivacy} onChange={(e) => setAcceptPrivacy(e.target.checked)}
+                                                className="w-4 h-4 text-primary bg-slate-50 dark:bg-slate-900 border-slate-300 dark:border-slate-600 rounded focus:ring-primary transition-colors cursor-pointer" />
+                                        </div>
+                                        <span className="text-xs text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">
+                                            Confirmo que he leído y acepto la Política de Privacidad.
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setCurrentStep(2)}
+                                    disabled={!isStep1Valid}
+                                    className="w-full bg-primary hover:bg-blue-600 disabled:bg-slate-400 text-white font-bold rounded-lg px-4 py-3 mt-6 transition-colors shadow-lg shadow-primary/30"
+                                >
+                                    Siguiente
+                                </button>
                             </div>
-                        )}
 
-                        <div className="space-y-3 mt-6 pt-2">
-                            <label htmlFor="reg-auth-data" className="flex items-start gap-3 cursor-pointer group">
-                                <div className="flex items-center h-5">
-                                    <input type="checkbox" id="reg-auth-data" name="authorizes_data_treatment" required
-                                        checked={acceptData} onChange={(e) => setAcceptData(e.target.checked)}
-                                        className="w-4 h-4 text-primary bg-slate-50 dark:bg-slate-900 border-slate-300 dark:border-slate-600 rounded focus:ring-primary dark:focus:ring-primary dark:ring-offset-slate-800 transition-colors cursor-pointer" />
-                                </div>
-                                <span className="text-xs text-slate-600 dark:text-slate-400 leading-tight group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">
-                                    Autorizo al Ministerio de Cultura de Panamá a que recolecte, almacene y trate mis datos personales, como responsable del Sistema de Información Cultural (Sicultura).
-                                </span>
-                            </label>
+                            {/* ---- SLIDE 2: Validación y Envío ---- */}
+                            <div className="w-1/2 flex-shrink-0 px-2 flex flex-col">
+                                <form className="space-y-4 flex flex-col h-full" onSubmit={handleRegistrationSubmit}>
+                                    <div>
+                                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Validación de Identidad</h3>
+                                        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+                                            Para asegurar que eres el dueño de esta cuenta, por favor valídala con tu correo electrónico.
+                                        </p>
+                                        <label htmlFor="reg-email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Correo electrónico *</label>
+                                        <div className="flex gap-2">
+                                            <input type="email" id="reg-email" name="email" required
+                                                value={emailStr}
+                                                onChange={(e) => setEmailStr(e.target.value)}
+                                                disabled={otpSent}
+                                                pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+                                                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary disabled:opacity-60 transition-colors"
+                                                placeholder="tu@correo.com" />
+                                            <button
+                                                type="button"
+                                                onClick={handleValidateEmail}
+                                                disabled={isLoading || (otpSent && countdown > 0) || !isEmailValid}
+                                                className="bg-primary hover:bg-blue-600 disabled:bg-slate-400 text-white px-6 py-2.5 rounded-lg text-sm font-bold transition-colors whitespace-nowrap"
+                                            >
+                                                {isLoading ? '...' : (otpSent ? 'Enviado' : 'Validar')}
+                                            </button>
+                                        </div>
+                                    </div>
 
-                            <label htmlFor="reg-accept-terms" className="flex items-start gap-3 cursor-pointer group">
-                                <div className="flex items-center h-5">
-                                    <input type="checkbox" id="reg-accept-terms" name="accepts_terms_conditions" required
-                                        checked={acceptTerms} onChange={(e) => setAcceptTerms(e.target.checked)}
-                                        className="w-4 h-4 text-primary bg-slate-50 dark:bg-slate-900 border-slate-300 dark:border-slate-600 rounded focus:ring-primary dark:focus:ring-primary dark:ring-offset-slate-800 transition-colors cursor-pointer" />
-                                </div>
-                                <span className="text-xs text-slate-600 dark:text-slate-400 leading-tight group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">
-                                    Confirmo que he leído en plenitud y acepto los Términos y Condiciones para el registro de fichas en el Directorio de Sicultura.
-                                </span>
-                            </label>
+                                    {otpSent && (
+                                        <div className="grid grid-cols-1 gap-4 mt-4 animate-fade-in-up">
+                                            <div>
+                                                <label htmlFor="reg-otp" className="flex justify-between items-center text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                                    <span>Código de Seguridad (OTP) *</span>
+                                                    <span className={`font-bold font-mono ${countdown > 60 ? 'text-primary' : 'text-secondary'}`}>
+                                                        {formatTime(countdown)}
+                                                    </span>
+                                                </label>
+                                                <input type="text" id="reg-otp" name="otp_code" required maxLength={6}
+                                                    value={otpCode} onChange={(e) => setOtpCode(e.target.value)}
+                                                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary transition-colors text-center tracking-widest font-bold text-lg"
+                                                    placeholder="000000" />
+                                                <p className="text-xs text-slate-500 mt-1">Ingresa el código que hemos enviado a tu correo.</p>
+                                            </div>
+                                        </div>
+                                    )}
 
-                            <label htmlFor="reg-accept-privacy" className="flex items-start gap-3 cursor-pointer group">
-                                <div className="flex items-center h-5">
-                                    <input type="checkbox" id="reg-accept-privacy" name="accepts_privacy_policy" required
-                                        checked={acceptPrivacy} onChange={(e) => setAcceptPrivacy(e.target.checked)}
-                                        className="w-4 h-4 text-primary bg-slate-50 dark:bg-slate-900 border-slate-300 dark:border-slate-600 rounded focus:ring-primary dark:focus:ring-primary dark:ring-offset-slate-800 transition-colors cursor-pointer" />
-                                </div>
-                                <span className="text-xs text-slate-600 dark:text-slate-400 leading-tight group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">
-                                    Confirmo que he leído y acepto la Política de Protección de Datos Personales de Sicultura.
-                                </span>
-                            </label>
+                                    <div className="flex-grow"></div>
+
+                                    <div className="mt-8 pt-4 flex gap-3 border-t border-slate-100 dark:border-slate-800">
+                                        <button
+                                            type="button"
+                                            onClick={() => setCurrentStep(1)}
+                                            className="w-1/3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-lg px-3 py-3 transition-colors text-sm"
+                                        >
+                                            Atrás
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={isLoading || !isStep2Valid}
+                                            className="w-2/3 bg-secondary hover:bg-red-800 disabled:bg-slate-400 text-white font-bold rounded-lg px-4 py-3 transition-colors shadow-lg shadow-secondary/30 text-sm"
+                                        >
+                                            {isLoading ? 'Registrando...' : 'Registrar'}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-
-                        <button type="submit" disabled={isLoading || !isFormValid}
-                            className="w-full bg-secondary hover:bg-red-800 disabled:bg-slate-400 text-white font-bold rounded-lg px-4 py-3 mt-6 transition-colors shadow-lg shadow-secondary/30">
-                            {isLoading ? 'Registrando...' : 'Crear Cuenta'}
-                        </button>
-                    </form>
+                    </div>
 
                     <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800 text-center">
                         <p className="text-slate-600 dark:text-slate-400 text-sm">

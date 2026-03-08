@@ -8,6 +8,8 @@ import proxyHandler from '../../api/proxy';
 import otpGenerateHandler from '../../api/otp/generate';
 import otpValidateHandler from '../../api/otp/validate';
 
+import catalogsHandler from '../../api/catalogs/index';
+
 dotenv.config();
 
 const app = express();
@@ -39,6 +41,10 @@ app.post('/api/otp/generate', (req, res) => {
 });
 app.post('/api/otp/validate', (req, res) => {
     const handler = (otpValidateHandler as any).default || otpValidateHandler;
+    return handler(req, res);
+});
+app.get('/api/catalogs', (req, res) => {
+    const handler = (catalogsHandler as any).default || catalogsHandler;
     return handler(req, res);
 });
 

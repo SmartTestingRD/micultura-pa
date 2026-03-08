@@ -17,7 +17,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             otpId, email, otpCode,
             full_name, phone_number,
             authorizes_data_treatment, accepts_terms_conditions, accepts_privacy_policy,
-            profile_type, profile_name
+            profile_type, profile_name, profile_metadata
         } = body || {};
 
         if (!otpId || !email || !otpCode || !full_name) {
@@ -91,14 +91,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             try {
                 const profileInsertQuery = `
                     INSERT INTO min_cultura.cultural_entities (
-                        entity_type, name, status, citizen_id
+                        entity_type, name, status, citizen_id, metadata
                     ) 
-                    VALUES ($1, $2, 'DRAFT', $3)
+                    VALUES ($1, $2, 'DRAFT', $3, $4)
                 `;
                 await query(profileInsertQuery, [
                     profile_type,
                     profile_name,
-                    citizenId
+                    citizenId,
+                    profile_metadata ? JSON.stringify(profile_metadata) : '{}'
                 ]);
             } catch (profileError) {
                 console.error('Error creating initial cultural profile:', profileError);
