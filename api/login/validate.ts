@@ -19,7 +19,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             return res.status(400).json({ error: 'otpId, email, and otpCode are required' });
         }
 
-        const isValid = await validateOTP(otpId, email, otpCode);
+        const skipValidation = process.env.SKIP_OTP_VALIDATION === 'true';
+        let isValid = false;
+
+        if (skipValidation) {
+            console.log(`[DEV MODE] Bypassing OTP validation for login email: ${email}`);
+            isValid = true;
+        } else {
+            isValid = await validateOTP(otpId, email, otpCode);
+        }
 
         if (!isValid) {
             return res.status(400).json({ error: 'Invalid or expired OTP' });
