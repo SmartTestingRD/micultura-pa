@@ -55,3 +55,35 @@ graph TD
 ## Patrones de Diseño Implementados
 - **Gestión de Estado Global**: Context API para el estado de autenticación (JWT) y preferencias del usuario (Dark Mode).
 - **Backend For Frontend (BFF)**: Las serverless functions (como `/api/proxy`) se utilizan para evitar CORS y pre-procesar data antes de que llegue a React.
+
+## Arquitectura de Almacenamiento (Storage)
+
+Para organizar los archivos visuales y documentos a escala en un entorno de la nube (como AWS S3, Vercel Blob o Google Cloud Storage), el sistema utiliza una estructura jerárquica basada en el propietario (Ciudadano). Esto facilita la agrupación de recursos, la purga de datos por cumplimiento de privacidad y el control de acceso (CORS/CDN).
+
+```text
+/storage-root
+│
+├── /citizens
+│   └── /{citizen_id}                  <-- ID (UUID) del Ciudadano en la base de datos
+│       ├── /profile
+│       │   └── avatar_{timestamp}.jpg <-- Foto de perfil de la cuenta base
+│       │
+│       ├── /documents
+│       │   └── dni_{timestamp}.pdf    <-- Cédula, pasaporte u hoja de vida privada
+│       │
+│       └── /entities
+│           └── /{entity_id}           <-- ID autoincremental de la Obra/Agente en Base de Datos
+│               ├── /gallery
+│               │   ├── feat_{hash}.jpg <-- La imagen "Destacada" (la primera que se subió)
+│               │   ├── alt_{hash}.jpg  <-- Las demás imágenes secundarias
+│               │   └── alt_{hash}.jpg
+│               │
+│               └── /certificates      <-- (A futuro) PDFs generados de Registro Público
+│
+├── /catalogs                          <-- (Opcional) Íconos o banners administrados por Backoffice
+│   └── /sectors
+│       └── sector_artes_visuales.png
+│
+└── /system
+    └── /ui_assets                     <-- Logos estáticos del sitio, marcas compartidas, vacantes
+```

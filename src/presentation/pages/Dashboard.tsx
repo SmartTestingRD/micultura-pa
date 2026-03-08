@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { HeaderPortal } from '../components/portal/HeaderPortal';
 import { SidebarPortal } from '../components/portal/SidebarPortal';
-import { FileText, Image, CheckCircle, Clock, Eye, Heart, PlusCircle, UserCog, Share2, MessageCircle, AlertCircle } from 'lucide-react';
+import { FileText, Image, CheckCircle, Clock, Eye, Heart, PlusCircle, UserCog, Share2, MessageCircle, AlertCircle, Edit3 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function Dashboard() {
@@ -10,43 +10,52 @@ export default function Dashboard() {
     const [profileStatus, setProfileStatus] = useState<string | null>(null);
     const [loadingStatus, setLoadingStatus] = useState(true);
 
+    const [worksStats, setWorksStats] = useState({
+        total: 0,
+        approved: 0,
+        review: 0,
+        in_creation: 0,
+        observed: 0,
+        totalViews: 0,
+        totalLikes: 0,
+        totalComments: 0,
+        totalShares: 0
+    });
+
     useEffect(() => {
-        const fetchStatus = async () => {
+        const fetchStatusAndStats = async () => {
             if (!token) return;
             try {
-                const response = await fetch('/api/portal/profile-status', {
+                // Fetch Profile Status
+                const responseStatus = await fetch('/api/portal/profile-status', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-
-                if (response.ok) {
-                    const data = await response.json();
+                if (responseStatus.ok) {
+                    const data = await responseStatus.json();
                     setProfileStatus(data.status);
                 }
+
+                // Fetch Work Stats
+                const responseStats = await fetch('/api/portal/works/stats', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (responseStats.ok) {
+                    const data = await responseStats.json();
+                    setWorksStats(data);
+                }
             } catch (error) {
-                console.error("Error fetching profile status", error);
+                console.error("Error fetching data", error);
             } finally {
                 setLoadingStatus(false);
             }
         };
 
-        fetchStatus();
+        fetchStatusAndStats();
     }, [token]);
 
     const profile = {
         name: user?.full_name || 'Ciudadano',
         status: profileStatus
-    };
-
-    const worksStats = {
-        total: 0,
-        approved: 0,
-        review: 0,
-        draft: 0,
-        observed: 0,
-        totalViews: 1850,
-        totalLikes: 420,
-        totalComments: 145,
-        totalShares: 89
     };
 
     const recentActivity = [
@@ -65,6 +74,38 @@ export default function Dashboard() {
             icon: Clock
         }
     ];
+
+    const validRoles = ['CITIZEN', 'EDITOR', 'SUPER_ADMIN', 'OPERATIVE', 'ADMIN'];
+    const userRole = user?.role?.toUpperCase() || '';
+    const isRoleRecognized = validRoles.includes(userRole);
+
+    if (user && !isRoleRecognized) {
+        return (
+            <div className="min-h-screen bg-[#f8fafc] flex font-sans">
+                <div className="flex-1 flex flex-col min-w-0">
+                    <HeaderPortal />
+                    <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-20 flex items-center justify-center">
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-12 text-center max-w-lg">
+                            <AlertCircle size={64} className="mx-auto text-amber-500 mb-6" />
+                            <h2 className="text-2xl font-bold text-slate-800 mb-3">Rol No Categorizado</h2>
+                            <p className="text-slate-600 mb-6">
+                                Su rol asignado (<span className="font-semibold">{user?.role || 'Ninguno'}</span>) no se encuentra dentro de las categorías reconocidas por el sistema.
+                            </p>
+                            <p className="text-slate-600">
+                                Por favor, comuníquese con el administrador del sistema para regularizar su cuenta.
+                            </p>
+                            <Link
+                                to="/"
+                                className="mt-8 inline-block px-6 py-2.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 font-medium transition-colors"
+                            >
+                                Volver al Inicio
+                            </Link>
+                        </div>
+                    </main>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[#f8fafc] flex font-sans">
@@ -169,6 +210,16 @@ export default function Dashboard() {
                                     <div className="stat-info">
                                         <span className="stat-value text-review">{worksStats.review}</span>
                                         <span className="stat-label">En Revisión</span>
+                                    </div>
+                                </div>
+
+                                <div className="stat-card card border-creation">
+                                    <div className="stat-icon bg-creation">
+                                        <Edit3 size={24} />
+                                    </div>
+                                    <div className="stat-info">
+                                        <span className="stat-value text-creation">{worksStats.in_creation}</span>
+                                        <span className="stat-label">En Creación</span>
                                     </div>
                                 </div>
                             </div>
@@ -416,12 +467,15 @@ export default function Dashboard() {
                     .bg-neutral { background: rgba(100, 116, 139, 0.1); color: #64748b; }
                     .bg-approved { background: #dcfce7; color: #166534; }
                     .bg-review { background: #fef3c7; color: #92400e; }
+                    .bg-creation { background: #e0f2fe; color: #0369a1; }
 
                     .border-approved { border-bottom: 4px solid #166534; }
                     .border-review { border-bottom: 4px solid #92400e; }
+                    .border-creation { border-bottom: 4px solid #0369a1; }
 
                     .text-approved { color: #166534; }
                     .text-review { color: #92400e; }
+                    .text-creation { color: #0369a1; }
 
                     .stat-info {
                         display: flex;

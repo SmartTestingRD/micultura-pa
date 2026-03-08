@@ -25,3 +25,17 @@ Procedimiento de reporte oficial:
 3. El equipo acusará recibo en un plazo no mayor a **48 horas laborables**, iniciando la apertura de una rama de contención confidencial inmediata (`hotfix-security`) para blindar el error antes de que el público lo adquiera mediante un parche retroactivo de urgencia.
 
 Toda contribución que preserve el entorno neutral y fiable de MiCultura agradece una acción discreta y pragmática.
+
+## Matriz de Control de Acceso basado en Roles (RBAC)
+
+El acceso a las APIs y al portal (tanto de Ciudadanos como Backoffice) obedece al atributo `role` del JSON Web Token emitido durante el login OTP o Admin.
+
+| Rol en DB / JWT | Alcance Principal | Capacidades Autorizadas |
+| ---------------- | :---------------: | :---------------------- |
+| `CITIZEN` / `citizen` | Portal de Creadores | - Leer y actualizar su Perfil de Ciudadano.<br>- Crear, autoguardar (borradores) y enviar registros a la base de `cultural_entities` (Obras, Agentes, Espacios).<br>- Leer catálogos públicos. |
+| `EDITOR` | Portal / Backoffice | - Leer y revisar entidades culturales creadas por los ciudadanos.<br>- Crear registros en nombre de ciudadanos asistidos (Soporte). |
+| `SUPER_ADMIN` | Backoffice | - Acceso irrestricto a la aprobación/rechazo de perfiles de ciudadanos.<br>- Cambio de estado de Obras, Eventos y Entidades.<br>- Administración de catálogos y metadata.<br>- Delegar capacidades excepcionales (Crear registros en nombre de ciudadanos). |
+| `OPERATIVE` / `ADMIN` | Backoffice (Legado) | - Roles para operadores internos del Ministerio enfocados en revisión, sin privilegios directos de creación sobre el Perfil del Creador. |
+
+> [!IMPORTANT]
+> **Filtro de Endpoint:** Múltiples endpoints como `/api/portal/works/create.ts` bloquean proactivamente las peticiones (HTTP 403 Forbidden) si el token decodificado no pertenece a `CITIZEN`, `EDITOR` o `SUPER_ADMIN`, garantizando que empleados internos sin el rol de atención al ciudadano no manipulen perfiles de terceros.

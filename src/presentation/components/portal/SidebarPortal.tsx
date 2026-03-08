@@ -47,7 +47,7 @@ export const SidebarPortal: React.FC<SidebarPortalProps> = ({ isPublished = fals
                 </NavLink>
 
                 <NavLink
-                    to="/portal/obras"
+                    to="/portal/construccion"
                     className={({ isActive }) =>
                         `flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${!isPublished ? 'pointer-events-none opacity-50 cursor-not-allowed' : ''} ${isActive
                             ? 'bg-[#1d4ed8] text-white'
@@ -73,7 +73,7 @@ export const SidebarPortal: React.FC<SidebarPortalProps> = ({ isPublished = fals
                 </NavLink>
 
                 <NavLink
-                    to="/portal/revision"
+                    to="/portal/construccion"
                     className={({ isActive }) =>
                         `flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${!isPublished ? 'pointer-events-none opacity-50 cursor-not-allowed' : ''} ${isActive
                             ? 'bg-[#1d4ed8] text-white'
@@ -86,7 +86,7 @@ export const SidebarPortal: React.FC<SidebarPortalProps> = ({ isPublished = fals
                 </NavLink>
 
                 <NavLink
-                    to="/portal/codigos"
+                    to="/portal/construccion"
                     className={({ isActive }) =>
                         `flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${!isPublished ? 'pointer-events-none opacity-50 cursor-not-allowed' : ''} ${isActive
                             ? 'bg-[#1d4ed8] text-white'
@@ -99,7 +99,7 @@ export const SidebarPortal: React.FC<SidebarPortalProps> = ({ isPublished = fals
                 </NavLink>
 
                 <NavLink
-                    to="/portal/certificados"
+                    to="/portal/construccion"
                     className={({ isActive }) =>
                         `flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${!isPublished ? 'pointer-events-none opacity-50 cursor-not-allowed' : ''} ${isActive
                             ? 'bg-[#1d4ed8] text-white'

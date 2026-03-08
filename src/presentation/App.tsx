@@ -97,8 +97,10 @@ import MapPage from './pages/MapPage';
 import News from './pages/News';
 import About from './pages/About';
 import RegisterWork from './pages/RegisterWork';
+import VerifyEntity from './pages/VerifyEntity';
 import { BackofficeHome } from './pages/backoffice/Home';
 import { ReviewProfiles } from './pages/backoffice/ReviewProfiles';
+import ConstructionPage from './pages/ConstructionPage';
 
 const CitizenRoute = ({ children }: { children: React.ReactNode }) => {
     const { isAuthenticated, isAdmin } = useAuth();
@@ -137,6 +139,8 @@ export default function App() {
                         <Route path="/novedades" element={<News />} />
                         <Route path="/sobre" element={<About />} />
 
+                        <Route path="/portal/verify/:id" element={<VerifyEntity />} />
+
                         {/* Citizen Dashboard Routes */}
                         <Route
                             path="/portal"
@@ -151,6 +155,14 @@ export default function App() {
                             element={
                                 <CitizenRoute>
                                     <RegisterWork />
+                                </CitizenRoute>
+                            }
+                        />
+                        <Route
+                            path="/portal/construccion"
+                            element={
+                                <CitizenRoute>
+                                    <ConstructionPage />
                                 </CitizenRoute>
                             }
                         />
@@ -179,6 +191,6 @@ export default function App() {
                     </Routes>
                 </BrowserRouter>
             </ThemeProvider>
-        </AuthProvider>
+        </AuthProvider >
     );
 }
