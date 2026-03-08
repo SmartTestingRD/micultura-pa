@@ -65,6 +65,12 @@ app.post('/api/backoffice/profiles/review', (req, res) => {
     return handler(req, res);
 });
 
+// Portal Routes
+app.get('/api/portal/profile-status', async (req, res) => {
+    const handler = (await import('../../api/portal/profile-status')).default;
+    return handler(req as any, res as any);
+});
+
 // Health check endpoint
 app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', environment: 'development' });
