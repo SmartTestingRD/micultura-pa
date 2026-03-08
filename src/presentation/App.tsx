@@ -96,6 +96,7 @@ import Statistics from './pages/Statistics';
 import MapPage from './pages/MapPage';
 import News from './pages/News';
 import About from './pages/About';
+import RegisterWork from './pages/RegisterWork';
 import { BackofficeHome } from './pages/backoffice/Home';
 import { ReviewProfiles } from './pages/backoffice/ReviewProfiles';
 
@@ -142,6 +143,14 @@ export default function App() {
                             element={
                                 <CitizenRoute>
                                     <Dashboard />
+                                </CitizenRoute>
+                            }
+                        />
+                        <Route
+                            path="/portal/registrar-obra"
+                            element={
+                                <CitizenRoute>
+                                    <RegisterWork />
                                 </CitizenRoute>
                             }
                         />

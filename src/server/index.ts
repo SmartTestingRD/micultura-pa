@@ -70,6 +70,14 @@ app.get('/api/portal/profile-status', async (req, res) => {
     const handler = (await import('../../api/portal/profile-status')).default;
     return handler(req as any, res as any);
 });
+app.get('/api/portal/catalogs/register-options', async (req, res) => {
+    const handler = (await import('../../api/portal/catalogs/register-options')).default;
+    return handler(req as any, res as any);
+});
+app.post('/api/portal/works/create', async (req, res) => {
+    const handler = (await import('../../api/portal/works/create')).default;
+    return handler(req as any, res as any);
+});
 
 // Health check endpoint
 app.get('/api/health', (_req, res) => {
