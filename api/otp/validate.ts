@@ -17,7 +17,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             otpId, email, otpCode,
             full_name, phone_number,
             authorizes_data_treatment, accepts_terms_conditions, accepts_privacy_policy,
-            profile_type, profile_name, profile_metadata
+            profile_type, profile_metadata
         } = body || {};
 
         if (!otpId || !email || !otpCode || !full_name) {
@@ -47,9 +47,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             const insertQuery = `
                 INSERT INTO min_cultura.citizens (
                     email, full_name, phone_number, is_verified, 
-                    authorizes_data_treatment, accepts_terms_conditions, accepts_privacy_policy
+                    authorizes_data_treatment, accepts_terms_conditions, accepts_privacy_policy,
+                    profile_type, status, metadata
                 ) 
-                VALUES ($1, $2, $3, $4, $5, $6, $7) 
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'PENDING', $9) 
                 RETURNING id
             `;
             const result = await query(insertQuery, [
@@ -59,9 +60,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 true, // is_verified
                 Boolean(authorizes_data_treatment),
                 Boolean(accepts_terms_conditions),
-                Boolean(accepts_privacy_policy)
+                Boolean(accepts_privacy_policy),
+                profile_type || 'CITIZEN',
+                profile_metadata ? JSON.stringify(profile_metadata) : '{}'
             ]);
             citizenId = result.rows[0].id;
+
+            // Log citizen creation
+            await query(`
+                INSERT INTO min_cultura.citizens_audit_log (
+                    citizen_id, action_type, previous_status, new_status, 
+                    performed_by_email, performer_role
+                ) VALUES ($1, 'REGISTRATION', NULL, 'PENDING', $2, 'CITIZEN')
+            `, [citizenId, email]);
         } else {
             // Update existing non-verified citizen
             citizenId = checkUser.rows[0].id;
@@ -73,6 +84,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                     authorizes_data_treatment = $4,
                     accepts_terms_conditions = $5,
                     accepts_privacy_policy = $6,
+                    profile_type = $7,
+                    status = COALESCE(status, 'PENDING'),
+                    metadata = $8,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE id = $1
             `;
@@ -82,31 +96,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 phone_number || null,
                 Boolean(authorizes_data_treatment),
                 Boolean(accepts_terms_conditions),
-                Boolean(accepts_privacy_policy)
+                Boolean(accepts_privacy_policy),
+                profile_type || 'CITIZEN',
+                profile_metadata ? JSON.stringify(profile_metadata) : '{}'
             ]);
+
+            // Log citizen update
+            await query(`
+                INSERT INTO min_cultura.citizens_audit_log (
+                    citizen_id, action_type, 
+                    performed_by_email, performer_role
+                ) VALUES ($1, 'PROFILE_UPDATE', $2, 'CITIZEN')
+            `, [citizenId, email]);
         }
 
-        // Create cultural profile if requested
-        if (profile_type && profile_type !== 'CITIZEN' && profile_name) {
-            try {
-                const profileInsertQuery = `
-                    INSERT INTO min_cultura.cultural_entities (
-                        entity_type, name, status, citizen_id, metadata
-                    ) 
-                    VALUES ($1, $2, 'DRAFT', $3, $4)
-                `;
-                await query(profileInsertQuery, [
-                    profile_type,
-                    profile_name,
-                    citizenId,
-                    profile_metadata ? JSON.stringify(profile_metadata) : '{}'
-                ]);
-            } catch (profileError) {
-                console.error('Error creating initial cultural profile:', profileError);
-                // We don't block the whole registration if profile creation fails, 
-                // but we log it. The citizen was already created successfully.
-            }
-        }
 
         const tokenPayload = {
             id: citizenId,

@@ -3,7 +3,7 @@ import { HeaderBackoffice } from '../../components/backoffice/HeaderBackoffice';
 import { SidebarBackoffice } from '../../components/backoffice/SidebarBackoffice';
 import { ReviewModal } from '../../components/backoffice/ReviewModal';
 import { useAuth } from '../../context/AuthContext';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Clock, CheckCircle, AlertCircle, PauseCircle } from 'lucide-react';
 
 interface PendingProfile {
     entity_id: string;
@@ -45,6 +45,7 @@ export const ReviewProfiles: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedProfile, setSelectedProfile] = useState<PendingProfile | null>(null);
+    const [statusFilter, setStatusFilter] = useState('PENDING');
 
     const fetchProfiles = async () => {
         try {
@@ -84,9 +85,44 @@ export const ReviewProfiles: React.FC = () => {
                     <div className="max-w-7xl mx-auto">
                         <div className="flex items-center justify-between mb-8">
                             <div>
-                                <h1 className="text-3xl font-bold text-slate-900">Perfiles por Revisar</h1>
-                                <p className="text-slate-500 mt-1">Gestión y aprobación de nuevos agentes culturales.</p>
+                                <h1 className="text-3xl font-bold text-slate-900">Todos los Ciudadanos</h1>
+                                <p className="text-slate-500 mt-1">Gestión y control de acceso de agentes culturales al portal.</p>
                             </div>
+                        </div>
+
+                        {/* STATUS CARDS */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                            {[
+                                { status: 'PENDING', label: 'Pendientes', icon: Clock, color: 'text-amber-600', bg: 'bg-amber-100', border: 'border-amber-200' },
+                                { status: 'CONFIRMED', label: 'Confirmados', icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-100', border: 'border-emerald-200' },
+                                { status: 'REJECTED', label: 'Rechazados', icon: AlertCircle, color: 'text-red-600', bg: 'bg-red-100', border: 'border-red-200' },
+                                { status: 'PAUSED', label: 'En Pausa', icon: PauseCircle, color: 'text-slate-600', bg: 'bg-slate-100', border: 'border-slate-200' }
+                            ].map((card) => {
+                                const count = profiles.filter(p => p.status === card.status).length;
+                                const isSelected = statusFilter === card.status;
+                                const Icon = card.icon;
+
+                                return (
+                                    <div
+                                        key={card.status}
+                                        onClick={() => setStatusFilter(card.status)}
+                                        className={`p-6 rounded-2xl border cursor-pointer transition-all duration-200 ${isSelected
+                                            ? `ring-2 ring-primary border-primary shadow-md bg-white`
+                                            : `border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm`
+                                            }`}
+                                    >
+                                        <div className="flex items-start justify-between">
+                                            <div>
+                                                <p className="text-sm font-semibold text-slate-500 mb-1">{card.label}</p>
+                                                <h3 className="text-3xl font-bold text-slate-900">{count}</h3>
+                                            </div>
+                                            <div className={`p-3 rounded-xl ${card.bg}`}>
+                                                <Icon className={card.color} size={24} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
 
                         {error && (
@@ -116,14 +152,14 @@ export const ReviewProfiles: React.FC = () => {
                                                     <p className="text-slate-500 font-medium">Cargando perfiles...</p>
                                                 </td>
                                             </tr>
-                                        ) : profiles.length === 0 ? (
+                                        ) : profiles.filter(p => p.status === statusFilter).length === 0 ? (
                                             <tr>
                                                 <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
-                                                    No hay perfiles pendientes de revisión en este momento.
+                                                    No hay ciudadanos en estado {statusFilter} en este momento.
                                                 </td>
                                             </tr>
                                         ) : (
-                                            profiles.map((profile) => (
+                                            profiles.filter(p => p.status === statusFilter).map((profile) => (
                                                 <tr key={profile.entity_id} className="hover:bg-slate-50 transition-colors">
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         {formatDate(profile.created_at)}
@@ -134,7 +170,7 @@ export const ReviewProfiles: React.FC = () => {
                                                     <td className="px-6 py-4">
                                                         <div className="font-bold text-slate-800">{profile.profile_name}</div>
                                                         <div className="text-xs text-slate-500 truncate max-w-[200px]">
-                                                            {profile.province}
+                                                            {profile.province || 'N/A'}
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4">
@@ -142,10 +178,26 @@ export const ReviewProfiles: React.FC = () => {
                                                         <div className="text-xs text-slate-500">{profile.contact_email}</div>
                                                     </td>
                                                     <td className="px-6 py-4 text-center">
-                                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
-                                                            <span className="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
-                                                            En Revisión
-                                                        </span>
+                                                        {profile.status === 'PENDING' && (
+                                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-amber-600"></span> Pendiente
+                                                            </span>
+                                                        )}
+                                                        {profile.status === 'CONFIRMED' && (
+                                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Confirmado
+                                                            </span>
+                                                        )}
+                                                        {profile.status === 'REJECTED' && (
+                                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-red-600"></span> Rechazado
+                                                            </span>
+                                                        )}
+                                                        {profile.status === 'PAUSED' && (
+                                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-800">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-slate-600"></span> En Pausa
+                                                            </span>
+                                                        )}
                                                     </td>
                                                     <td className="px-6 py-4 text-right">
                                                         <button

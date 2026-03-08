@@ -42,10 +42,15 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, profi
     const { token } = useAuth();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [actionReason, setActionReason] = useState('');
 
     if (!isOpen || !profile) return null;
 
-    const handleReview = async (newStatus: 'PUBLISHED' | 'REJECTED') => {
+    const handleReview = async (newStatus: 'CONFIRMED' | 'REJECTED' | 'PAUSED') => {
+        if ((newStatus === 'REJECTED' || newStatus === 'PAUSED') && !actionReason.trim()) {
+            setError('Debe proporcionar un motivo para esta acción.');
+            return;
+        }
         setLoading(true);
         setError('');
         try {
@@ -57,7 +62,8 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, profi
                 },
                 body: JSON.stringify({
                     entityId: profile.entity_id,
-                    newStatus
+                    newStatus,
+                    reason: actionReason
                 })
             });
 
@@ -67,6 +73,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, profi
             }
 
             onReviewed(); // Trigger refresh on parent
+            setActionReason('');
             onClose();
         } catch (err: any) {
             setError(err.message);
@@ -86,7 +93,10 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, profi
                         <p className="text-sm text-slate-500 mt-1">Revisa detalladamente la información antes de aprobar.</p>
                     </div>
                     <button
-                        onClick={onClose}
+                        onClick={() => {
+                            setActionReason('');
+                            onClose();
+                        }}
                         className="p-2 hover:bg-slate-200 rounded-full transition-colors text-slate-500"
                     >
                         <span className="material-symbols-outlined">close</span>
@@ -192,23 +202,45 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, profi
                     </div>
                 </div>
 
+                {/* Acciones Secundarias (Motivo) */}
+                <div className="px-8 pt-4 bg-slate-50 border-t border-slate-100">
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                        Motivo de Rechazo o Pausa (Requerido para estas acciones):
+                    </label>
+                    <textarea
+                        className="w-full border border-slate-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none resize-none h-20"
+                        placeholder="Ej. El documento de identidad no es legible..."
+                        value={actionReason}
+                        onChange={(e) => setActionReason(e.target.value)}
+                        disabled={loading}
+                    />
+                </div>
+
                 {/* Footer (Actions) */}
-                <div className="px-8 py-5 bg-slate-50 border-t border-slate-100 flex justify-end gap-3 rounded-b-3xl">
+                <div className="px-8 py-5 bg-slate-50 flex justify-end gap-3 rounded-b-3xl">
                     <button
                         onClick={() => handleReview('REJECTED')}
                         disabled={loading}
-                        className="px-6 py-2.5 border-2 border-slate-200 text-slate-600 hover:text-red-600 hover:border-red-200 hover:bg-red-50 font-bold rounded-xl transition-all disabled:opacity-50"
+                        className="px-6 py-2.5 border-2 border-red-200 text-red-600 hover:bg-red-50 font-bold rounded-xl transition-all disabled:opacity-50"
                     >
                         Rechazar
                     </button>
 
                     <button
-                        onClick={() => handleReview('PUBLISHED')}
+                        onClick={() => handleReview('PAUSED')}
+                        disabled={loading}
+                        className="px-6 py-2.5 border-2 border-slate-300 text-slate-600 hover:bg-slate-100 font-bold rounded-xl transition-all disabled:opacity-50"
+                    >
+                        Pausar
+                    </button>
+
+                    <button
+                        onClick={() => handleReview('CONFIRMED')}
                         disabled={loading}
                         className="px-8 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-green-600/30 flex items-center gap-2 disabled:opacity-50"
                     >
                         {loading ? <Loader2 className="animate-spin" size={20} /> : <span className="material-symbols-outlined text-lg">check_circle</span>}
-                        Aprobar y Publicar
+                        Aprobar y Confirmar
                     </button>
                 </div>
             </div>

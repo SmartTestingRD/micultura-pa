@@ -8,27 +8,25 @@ const handler = async (req: AuthenticatedRequest, res: VercelResponse) => {
     }
 
     try {
-        const pendingQuery = `
+        const queryText = `
             SELECT 
-                ce.id as entity_id,
-                ce.entity_type,
-                ce.name as profile_name,
-                ce.description,
-                ce.province,
-                ce.status,
-                ce.created_at,
+                c.id as entity_id,
+                c.profile_type as entity_type,
+                c.full_name as profile_name,
+                '' as description,
+                '' as province,
+                c.status,
+                c.created_at,
                 c.id as citizen_id,
                 c.full_name as citizen_name,
                 c.email as contact_email,
                 c.phone_number as contact_phone,
-                ce.metadata
-            FROM min_cultura.cultural_entities ce
-            JOIN min_cultura.citizens c ON ce.citizen_id = c.id
-            WHERE ce.status = 'DRAFT'
-            ORDER BY ce.created_at ASC
+                c.metadata
+            FROM min_cultura.citizens c
+            ORDER BY c.created_at DESC
         `;
 
-        const result = await query(pendingQuery);
+        const result = await query(queryText);
 
         return res.status(200).json({ profiles: result.rows });
     } catch (error: any) {

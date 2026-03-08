@@ -37,23 +37,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(401).json({ message: 'Invalid or expired token', error: err instanceof Error ? err.message : String(err) });
     }
 
-    // 2. Fetch the entity status
+    // 2. Fetch the citizen status
     try {
         const query = `
-            SELECT id, entity_type, status 
-            FROM min_cultura.cultural_entities 
-            WHERE citizen_id = $1 
-            ORDER BY created_at DESC 
+            SELECT id, profile_type, status 
+            FROM min_cultura.citizens 
+            WHERE id = $1 
             LIMIT 1;
         `;
         const { rows } = await pool.query(query, [citizenId]);
 
         if (rows.length === 0) {
-            // Citizen has no profiles registered
+            // Citizen not found
             return res.status(200).json({ status: 'UNREGISTERED' });
         }
 
-        // Return the latest profile status
+        // Return the profile status
         return res.status(200).json({ status: rows[0].status });
     } catch (error) {
         console.error('Error fetching profile status:', error);

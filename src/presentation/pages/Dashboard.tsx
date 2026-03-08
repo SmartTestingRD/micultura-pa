@@ -68,7 +68,7 @@ export default function Dashboard() {
 
     return (
         <div className="min-h-screen bg-[#f8fafc] flex font-sans">
-            <SidebarPortal isPublished={profileStatus === 'PUBLISHED'} />
+            <SidebarPortal isPublished={profileStatus === 'CONFIRMED'} />
 
             <div className="flex-1 flex flex-col min-w-0">
                 <HeaderPortal />
@@ -89,17 +89,21 @@ export default function Dashboard() {
                                     <span className="badge badge-lg text-slate-400 bg-slate-100 flex items-center gap-2 px-4 py-2">
                                         <Clock size={18} className="animate-spin" /> Cargando...
                                     </span>
-                                ) : profile.status === 'PUBLISHED' ? (
+                                ) : profile.status === 'CONFIRMED' ? (
                                     <span className="badge badge-approved badge-lg flex items-center gap-2 px-4 py-2 bg-[#e6ffed] text-[#22c55e] border border-[#bbf7d0]">
-                                        <CheckCircle size={18} /> Aprobado
+                                        <CheckCircle size={18} /> Confirmado
                                     </span>
                                 ) : profile.status === 'REJECTED' ? (
                                     <span className="badge badge-lg flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 border border-red-200">
                                         <AlertCircle size={18} /> Rechazado
                                     </span>
-                                ) : profile.status === 'DRAFT' ? (
+                                ) : profile.status === 'PENDING' ? (
                                     <span className="badge badge-lg flex items-center gap-2 px-4 py-2 bg-yellow-100 text-yellow-700 border border-yellow-200">
-                                        <Clock size={18} /> En Revisión
+                                        <Clock size={18} /> Pendiente / En Revisión
+                                    </span>
+                                ) : profile.status === 'PAUSED' ? (
+                                    <span className="badge badge-lg flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 border border-slate-300">
+                                        <AlertCircle size={18} /> En Pausa
                                     </span>
                                 ) : (
                                     <span className="badge badge-lg flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 border border-slate-200">
@@ -110,7 +114,7 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    {profile.status === 'PUBLISHED' ? (
+                    {profile.status === 'CONFIRMED' ? (
                         <>
                             {/* QUICK ACTIONS - BIG BUTTONS */}
                             <div className="quick-actions-grid mb-10 gap-6">
@@ -239,7 +243,7 @@ export default function Dashboard() {
                             <AlertCircle className="mx-auto text-slate-300 mb-4" size={56} />
                             <h3 className="text-xl font-bold text-slate-900 mb-2">Acceso Restringido</h3>
                             <p className="text-slate-500">
-                                Tu perfil debe estar <strong className="text-slate-700">Aprobado</strong> para poder acceder a las funciones del portal, registrar obras o visualizar tus métricas. <br /><br />
+                                Tu perfil debe estar <strong className="text-slate-700">Confirmado</strong> para poder acceder a las funciones del portal, registrar obras o visualizar tus métricas. <br /><br />
                                 Si acabas de registrarte o si enviaste una corrección, por favor espera a que un funcionario revise tu información.
                             </p>
                         </div>
