@@ -1,8 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Header } from '../components/Header';
+import { useAuth } from '../context/AuthContext';
+import { ProfileCreationModal } from '../components/ProfileCreationModal';
 
 export default function Home() {
+    const { isAuthenticated, user } = useAuth();
+    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
     useEffect(() => {
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -26,6 +31,25 @@ export default function Home() {
 
 
             <Header />
+            <ProfileCreationModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
+
+            {isAuthenticated && user && (
+                <div className="bg-primary/5 border-b border-gray-200 py-4 mt-[72px]">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div>
+                            <h2 className="text-xl font-bold text-gray-900 font-lora">Bienvenido, {user.full_name || 'Ciudadano'}</h2>
+                            <p className="text-sm text-gray-600">Podrás formar parte del directorio cultural solicitando la creación de tu perfil.</p>
+                        </div>
+                        <button
+                            onClick={() => setIsProfileModalOpen(true)}
+                            className="bg-primary hover:bg-primary-dark text-white px-6 py-2 rounded-lg font-medium transition-colors shadow-sm"
+                        >
+                            Crear Perfil Cultural
+                        </button>
+                    </div>
+                </div>
+            )}
+
 
             <section className="relative w-full min-h-[600px] flex items-center justify-center overflow-hidden pb-16 pt-10">
                 <div className="absolute inset-0 z-0">
@@ -611,7 +635,7 @@ export default function Home() {
             </footer>
 
 
-            
+
 
 
 
