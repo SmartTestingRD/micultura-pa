@@ -103,6 +103,8 @@ import { ReviewProfiles } from './pages/backoffice/ReviewProfiles';
 import { ReviewWorks } from './pages/backoffice/ReviewWorks';
 import ConstructionPage from './pages/ConstructionPage';
 import Reviews from './pages/Reviews';
+import WorksList from './pages/WorksList';
+import WorkDetail from './pages/WorkDetail';
 
 const CitizenRoute = ({ children }: { children: React.ReactNode }) => {
     const { isAuthenticated, isAdmin } = useAuth();
@@ -157,6 +159,22 @@ export default function App() {
                             element={
                                 <CitizenRoute>
                                     <RegisterWork />
+                                </CitizenRoute>
+                            }
+                        />
+                        <Route
+                            path="/portal/obras"
+                            element={
+                                <CitizenRoute>
+                                    <WorksList />
+                                </CitizenRoute>
+                            }
+                        />
+                        <Route
+                            path="/portal/obras/:id"
+                            element={
+                                <CitizenRoute>
+                                    <WorkDetail />
                                 </CitizenRoute>
                             }
                         />
