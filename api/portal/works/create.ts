@@ -43,7 +43,8 @@ export default requireAuth(async (req: AuthenticatedRequest, res: VercelResponse
             services,
             coverage,
             members,
-            imageUrls
+            imageUrls,
+            metadata: reqMetadata // Parse extended metadata from frontend
         } = req.body;
 
         if (!title) {
@@ -60,19 +61,20 @@ export default requireAuth(async (req: AuthenticatedRequest, res: VercelResponse
 
         // Construir JSON Metadata con campos dinámicos y extras puros
         const metadata = {
-            category: category || null,
-            subcategory: subcategory || null,
-            seriesCount: seriesCount || 1,
-            sectors: sectors || [],
-            yearStarted: yearStarted || null,
-            locationType: locationType || 'física',
-            website: website || null,
-            socials: socials || {},
-            videoUrl: videoUrl || null,
-            artisticRoles: artisticRoles || [],
-            services: services || [],
-            coverage: coverage || null,
-            members: members || []
+            ...(reqMetadata || {}), // Inherit all dynamic fields like techniques, dimensions, etc.
+            category: category || reqMetadata?.category || null,
+            subcategory: subcategory || reqMetadata?.subcategory || reqMetadata?.subType || null,
+            seriesCount: seriesCount || reqMetadata?.seriesCount || 1,
+            sectors: sectors || reqMetadata?.sectors || [],
+            yearStarted: yearStarted || reqMetadata?.yearStarted || null,
+            locationType: locationType || reqMetadata?.locationType || 'física',
+            website: website || reqMetadata?.website || null,
+            socials: socials || reqMetadata?.socials || {},
+            videoUrl: videoUrl || reqMetadata?.videoUrl || null,
+            artisticRoles: artisticRoles || reqMetadata?.artisticRoles || reqMetadata?.roles || [],
+            services: services || reqMetadata?.services || [],
+            coverage: coverage || reqMetadata?.coverage || null,
+            members: members || reqMetadata?.members || []
         };
 
         // Determinar citizen_id asegurando Case-Insensitive

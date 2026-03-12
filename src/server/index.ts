@@ -65,6 +65,16 @@ app.post('/api/backoffice/profiles/review', (req, res) => {
     return handler(req, res);
 });
 
+// Works Backoffice Routes
+app.get('/api/backoffice/works/pending', async (req, res) => {
+    const handler = (await import('../../api/backoffice/works/pending')).default;
+    return handler(req as any, res as any);
+});
+app.post('/api/backoffice/works/review', async (req, res) => {
+    const handler = (await import('../../api/backoffice/works/review')).default;
+    return handler(req as any, res as any);
+});
+
 // Portal Routes
 app.get('/api/portal/profile-status', async (req, res) => {
     const handler = (await import('../../api/portal/profile-status')).default;
@@ -88,6 +98,11 @@ app.get('/api/portal/works/stats', async (req, res) => {
 });
 app.get('/api/portal/works/list', async (req, res) => {
     const handler = (await import('../../api/portal/works/list')).default;
+    return handler(req as any, res as any);
+});
+
+app.get('/api/portal/works/get', async (req, res) => {
+    const handler = (await import('../../api/portal/works/get')).default;
     return handler(req as any, res as any);
 });
 

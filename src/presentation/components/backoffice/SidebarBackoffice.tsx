@@ -7,6 +7,7 @@ export const SidebarBackoffice: React.FC = () => {
     const menuItems = [
         { name: 'Dashboard', icon: 'dashboard', path: '/admin' },
         { name: 'Perfiles Creados', icon: 'pending_actions', path: '/admin/profiles/pending' },
+        { name: 'Revisión de Obras', icon: 'collections', path: '/admin/revision-obras' },
         { name: 'Directorio Aprobado', icon: 'storefront', path: '/admin/directory' },
         { name: 'Usuarios Internos', icon: 'manage_accounts', path: '/admin/users' },
         { name: 'Catálogos', icon: 'category', path: '/admin/catalogs' },

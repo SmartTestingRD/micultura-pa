@@ -235,12 +235,28 @@ export default function Reviews() {
                               }
                             </td>
                             <td className="py-4 px-6 text-center">
-                              {work.status === 'OBSERVED' ? (
+                              {work.status === 'IN_CREATION' ? (
+                                <button
+                                  className="mx-auto w-8 h-8 rounded-full border border-slate-300 flex items-center justify-center text-slate-500 hover:text-blue-600 hover:border-blue-600 hover:bg-blue-50 transition-colors"
+                                  title="Continuar Registro"
+                                  onClick={() => navigate(`/portal/registrar-obra/${work.id}`)}
+                                >
+                                  <ChevronRight size={16} />
+                                </button>
+                              ) : work.status === 'OBSERVED' ? (
                                 <button
                                   className="mx-auto bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-sm font-medium transition-colors"
                                   onClick={() => navigate(`/portal/obras/${work.id}`)}
                                 >
                                   Subsanar
+                                </button>
+                              ) : work.status === 'UNDER_REVIEW' ? (
+                                <button
+                                  className="mx-auto w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-300 bg-slate-50 cursor-not-allowed"
+                                  title="En Evaluación"
+                                  disabled
+                                >
+                                  <ChevronRight size={16} />
                                 </button>
                               ) : (
                                 <button
@@ -248,7 +264,7 @@ export default function Reviews() {
                                   title="Ver Detalles"
                                   onClick={() => navigate(`/portal/obras/${work.id}`)}
                                 >
-                                  <ChevronRight size={18} />
+                                  <ChevronRight size={16} />
                                 </button>
                               )}
                             </td>

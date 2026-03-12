@@ -100,6 +100,7 @@ import RegisterWork from './pages/RegisterWork';
 import VerifyEntity from './pages/VerifyEntity';
 import { BackofficeHome } from './pages/backoffice/Home';
 import { ReviewProfiles } from './pages/backoffice/ReviewProfiles';
+import { ReviewWorks } from './pages/backoffice/ReviewWorks';
 import ConstructionPage from './pages/ConstructionPage';
 import Reviews from './pages/Reviews';
 
@@ -160,6 +161,14 @@ export default function App() {
                             }
                         />
                         <Route
+                            path="/portal/registrar-obra/:id"
+                            element={
+                                <CitizenRoute>
+                                    <RegisterWork />
+                                </CitizenRoute>
+                            }
+                        />
+                        <Route
                             path="/portal/revisiones-gestion-obras"
                             element={
                                 <CitizenRoute>
@@ -184,6 +193,7 @@ export default function App() {
                                     <Routes>
                                         <Route path="" element={<BackofficeHome />} />
                                         <Route path="profiles/pending" element={<ReviewProfiles />} />
+                                        <Route path="revision-obras" element={<ReviewWorks />} />
                                     </Routes>
                                 </AdminRoute>
                             }

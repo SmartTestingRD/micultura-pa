@@ -1,13 +1,13 @@
 /* eslint-disable */
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Upload, CheckCircle, HelpCircle, FileImage, FileText, ChevronRight, ChevronLeft, Save, Eye } from 'lucide-react';
+import { Upload, CheckCircle, HelpCircle, FileImage, FileText, ChevronRight, ChevronLeft, Save, Eye, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { SidebarPortal } from '../components/portal/SidebarPortal';
 import { HeaderPortal } from '../components/portal/HeaderPortal';
 import { QRCodeSVG } from 'qrcode.react';
 
-type Status = 'IN_CREATION' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED' | 'PAUSED';
+type Status = 'IN_CREATION' | 'UNDER_REVIEW' | 'OBSERVED' | 'APPROVED' | 'REJECTED' | 'PAUSED';
 
 export default function RegisterWork() {
     const { id } = useParams<{ id: string }>();
@@ -16,7 +16,7 @@ export default function RegisterWork() {
 
     // TODO: implement with real API getWorks
     // const addWork = (work: any) => console.log('Saving work', work);
-    const works: any[] = []; // temporary mock
+    // const works: any[] = []; // temporary mock removed
     const isEditing = !!id;
 
     const [currentStep, setCurrentStep] = useState(1);
@@ -56,46 +56,68 @@ export default function RegisterWork() {
     const [members, setMembers] = useState<{ name: string, role: string }[]>([]);
     const [artisticRoles, setArtisticRoles] = useState<string[]>([]);
     const [services, setServices] = useState<string[]>([]);
+    const [isObserved, setIsObserved] = useState(false);
+    const [observedReason, setObservedReason] = useState('');
 
     useEffect(() => {
-        if (isEditing && id) {
-            const existingWork = works.find(w => w.id.toString() === id);
-            if (existingWork) {
-                const isFicha = !!existingWork.subcategory;
-                setMainType(isFicha ? 'agente' : 'obra'); // simplistic
+        const fetchWork = async () => {
+            if (isEditing && id && token) {
+                try {
+                    const res = await fetch(`/api/portal/works/get?id=${id}`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        const existingWork = data.metadata || {};
+                        const isFicha = existingWork.mainType === 'agente';
+                        setMainType(isFicha ? 'agente' : 'obra');
 
-                setFormData({
-                    title: existingWork.title,
-                    category: existingWork.category,
-                    description: existingWork.description,
-                    techniques: '',
-                    dimensions: '',
-                    year: existingWork.yearStarted || new Date().getFullYear().toString(),
-                    seriesCount: existingWork.seriesCount ? existingWork.seriesCount.toString() : '1',
-                    sectors: existingWork.sectors || [],
-                    locationType: existingWork.locationType || 'física',
-                    address: existingWork.address || '',
-                    phone: existingWork.phone || '',
-                    email: existingWork.email || '',
-                    website: existingWork.website || '',
-                    socials: (existingWork.socials as { facebook: string; instagram: string; x: string }) || { facebook: '', instagram: '', x: '' },
-                    videoUrl: existingWork.videoUrl || '',
-                    coverage: existingWork.coverage || ''
-                });
+                        if (data.status === 'OBSERVED') {
+                            setIsObserved(true);
+                            setObservedReason(existingWork.reviewer_notes || 'Su solicitud requiere subsanación.');
+                        }
 
-                if (existingWork.subcategory) setSubType(existingWork.subcategory);
-                if (existingWork.members) setMembers(existingWork.members);
-                if (existingWork.artisticRoles) setArtisticRoles(existingWork.artisticRoles);
-                if (existingWork.services) setServices(existingWork.services);
+                        setFormData({
+                            title: data.title || '',
+                            category: existingWork.category || data.category || '',
+                            description: existingWork.description || '',
+                            techniques: existingWork.techniques || '',
+                            dimensions: existingWork.dimensions || '',
+                            year: existingWork.yearStarted || new Date().getFullYear().toString(),
+                            seriesCount: existingWork.seriesCount || '1',
+                            sectors: existingWork.sectors || [],
+                            locationType: existingWork.locationType || 'física',
+                            address: existingWork.address || '',
+                            phone: existingWork.phone || '',
+                            email: existingWork.email || '',
+                            website: existingWork.website || '',
+                            socials: existingWork.socials || { facebook: '', instagram: '', x: '' },
+                            videoUrl: existingWork.videoUrl || '',
+                            coverage: existingWork.coverage || ''
+                        });
 
-                if (existingWork.imageUrl) {
-                    setImages([existingWork.imageUrl]);
-                } else {
-                    setImages([`https://picsum.photos/seed/${existingWork.id}/800/600`]);
+                        if (existingWork.subType) setSubType(existingWork.subType);
+                        if (existingWork.members) setMembers(existingWork.members);
+                        if (existingWork.artisticRoles) setArtisticRoles(existingWork.artisticRoles);
+                        if (existingWork.services) setServices(existingWork.services);
+
+                        if (existingWork.imageUrls && existingWork.imageUrls.length > 0) {
+                            setImages(existingWork.imageUrls);
+                        } else if (existingWork.imageUrl) {
+                            setImages([existingWork.imageUrl]);
+                        }
+                    } else {
+                        console.error('Failed to fetch existing draft or work data');
+                    }
+                } catch (error) {
+                    console.error('Error fetching work data:', error);
                 }
             }
-        }
-    }, [isEditing, id, works]);
+        };
+        fetchWork();
+    }, [isEditing, id, token]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setFormData({
@@ -254,7 +276,9 @@ export default function RegisterWork() {
                 artisticRoles: subType === 'Personas' ? artisticRoles : undefined,
                 services: subType === 'Empresas y emprendimientos' ? services : undefined,
                 coverage: subType === 'Empresas y emprendimientos' ? formData.coverage : undefined,
-                members: subType === 'Agrupaciones' ? members : undefined
+                members: subType === 'Agrupaciones' ? members : undefined,
+                techniques: mainType === 'obra' ? formData.techniques : undefined,
+                dimensions: mainType === 'obra' ? formData.dimensions : undefined
             }
         };
     }
@@ -407,7 +431,7 @@ export default function RegisterWork() {
                                 </div>
                             ) : (
                                 <>
-                                    <div className="mb-10 flex justify-between items-end">
+                                    <div className="mb-8 flex justify-between items-end">
                                         <div>
                                             <h1 className="page-title text-[28px] font-extrabold text-[#0f172a] tracking-tight mb-2">
                                                 {isEditing ? 'Editar Registro' : 'Registrar Nueva Obra o Ficha'}
@@ -417,6 +441,25 @@ export default function RegisterWork() {
                                             </p>
                                         </div>
                                     </div>
+
+                                    {isObserved && (
+                                        <div className="mb-8 bg-amber-50 border border-amber-200 rounded-xl p-5 flex items-start gap-4 shadow-sm animate-fade-in">
+                                            <div className="mt-0.5 bg-amber-100 p-2 rounded-full text-amber-600">
+                                                <AlertTriangle size={24} />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-lg font-bold text-amber-900 mb-1">
+                                                    Trámite con Observaciones
+                                                </h3>
+                                                <p className="text-amber-800 text-sm leading-relaxed mb-3">
+                                                    El Ministerio de Cultura ha revisado su solicitud y determinó que debe corregir o subsanar la siguiente información antes de su aprobación final:
+                                                </p>
+                                                <div className="bg-white/60 rounded border border-amber-200/60 p-3 text-sm text-amber-900 font-medium italic border-l-4 border-l-amber-500 shadow-inner">
+                                                    "{observedReason}"
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
 
                                     <div className="stepper mb-8">
                                         {[1, 2, 3, 4].map((step) => (
