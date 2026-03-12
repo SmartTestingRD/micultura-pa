@@ -82,6 +82,14 @@ app.post('/api/portal/works/upload', async (req, res) => {
     const handler = (await import('../../api/portal/works/upload')).default;
     return handler(req as any, res as any);
 });
+app.get('/api/portal/works/stats', async (req, res) => {
+    const handler = (await import('../../api/portal/works/stats')).default;
+    return handler(req as any, res as any);
+});
+app.get('/api/portal/works/list', async (req, res) => {
+    const handler = (await import('../../api/portal/works/list')).default;
+    return handler(req as any, res as any);
+});
 
 // Health check endpoint
 app.get('/api/health', (_req, res) => {

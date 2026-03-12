@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { HeaderPortal } from '../components/portal/HeaderPortal';
 import { SidebarPortal } from '../components/portal/SidebarPortal';
-import { FileText, Image, CheckCircle, Clock, Eye, Heart, PlusCircle, UserCog, Share2, MessageCircle, AlertCircle, Edit3 } from 'lucide-react';
+import { Users, ClipboardList, CheckCircle, FileText, ExternalLink, Activity, Info, BarChart3, AlertCircle, Edit3, Image, Clock, Eye, Heart, PlusCircle, UserCog, Share2, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function Dashboard() {

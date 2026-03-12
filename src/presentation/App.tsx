@@ -101,6 +101,7 @@ import VerifyEntity from './pages/VerifyEntity';
 import { BackofficeHome } from './pages/backoffice/Home';
 import { ReviewProfiles } from './pages/backoffice/ReviewProfiles';
 import ConstructionPage from './pages/ConstructionPage';
+import Reviews from './pages/Reviews';
 
 const CitizenRoute = ({ children }: { children: React.ReactNode }) => {
     const { isAuthenticated, isAdmin } = useAuth();
@@ -155,6 +156,14 @@ export default function App() {
                             element={
                                 <CitizenRoute>
                                     <RegisterWork />
+                                </CitizenRoute>
+                            }
+                        />
+                        <Route
+                            path="/portal/revisiones-gestion-obras"
+                            element={
+                                <CitizenRoute>
+                                    <Reviews />
                                 </CitizenRoute>
                             }
                         />
