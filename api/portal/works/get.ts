@@ -24,15 +24,21 @@ export default requireAuth(async (req: AuthenticatedRequest, res: VercelResponse
 
         const query = `
             SELECT 
-                id,
-                entity_type,
-                name as title,
-                status,
-                metadata,
-                created_at,
-                updated_at
-            FROM min_cultura.cultural_entities
-            WHERE id = $1 AND citizen_id = $2
+                ce.id,
+                ce.entity_type,
+                ce.name as title,
+                ce.description,
+                ce.status,
+                ce.metadata,
+                (
+                    SELECT json_agg(em.media_url)
+                    FROM min_cultura.entity_media em
+                    WHERE em.entity_id = ce.id AND em.media_type = 'GALLERY_IMAGE'
+                ) as image_urls,
+                ce.created_at,
+                ce.updated_at
+            FROM min_cultura.cultural_entities ce
+            WHERE ce.id = $1 AND ce.citizen_id = $2
         `;
 
         const result = await db.query(query, [id, citizenId]);
@@ -50,6 +56,8 @@ export default requireAuth(async (req: AuthenticatedRequest, res: VercelResponse
             id: work.id,
             entity_type: work.entity_type,
             title: work.title,
+            description: work.description,
+            imageUrls: work.image_urls || [],
             status: work.status,
             category: category,
             metadata: work.metadata || {}

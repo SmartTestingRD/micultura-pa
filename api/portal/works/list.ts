@@ -16,15 +16,22 @@ export default requireAuth(async (req: AuthenticatedRequest, res: VercelResponse
 
         const query = `
             SELECT 
-                id,
-                COALESCE(metadata->>'category', entity_type) as category,
-                name as title,
-                status,
-                responsible_area,
-                TO_CHAR(created_at, 'DD Mon YYYY') as date
-            FROM min_cultura.cultural_entities
-            WHERE citizen_id = $1
-            ORDER BY created_at DESC
+                ce.id,
+                COALESCE(ce.metadata->>'category', ce.entity_type) as category,
+                ce.name as title,
+                ce.description,
+                ce.metadata,
+                (
+                    SELECT json_agg(em.media_url)
+                    FROM min_cultura.entity_media em
+                    WHERE em.entity_id = ce.id AND em.media_type = 'GALLERY_IMAGE'
+                ) as image_urls,
+                ce.status,
+                ce.responsible_area,
+                TO_CHAR(ce.created_at, 'DD Mon YYYY') as date
+            FROM min_cultura.cultural_entities ce
+            WHERE ce.citizen_id = $1
+            ORDER BY ce.created_at DESC
         `;
 
         const result = await db.query(query, [user.id]);

@@ -82,7 +82,7 @@ export default function RegisterWork() {
                         setFormData({
                             title: data.title || '',
                             category: existingWork.category || data.category || '',
-                            description: existingWork.description || '',
+                            description: data.description || existingWork.description || '',
                             techniques: existingWork.techniques || '',
                             dimensions: existingWork.dimensions || '',
                             year: existingWork.yearStarted || new Date().getFullYear().toString(),
@@ -103,7 +103,9 @@ export default function RegisterWork() {
                         if (existingWork.artisticRoles) setArtisticRoles(existingWork.artisticRoles);
                         if (existingWork.services) setServices(existingWork.services);
 
-                        if (existingWork.imageUrls && existingWork.imageUrls.length > 0) {
+                        if (data.imageUrls && data.imageUrls.length > 0) {
+                            setImages(data.imageUrls);
+                        } else if (existingWork.imageUrls && existingWork.imageUrls.length > 0) {
                             setImages(existingWork.imageUrls);
                         } else if (existingWork.imageUrl) {
                             setImages([existingWork.imageUrl]);

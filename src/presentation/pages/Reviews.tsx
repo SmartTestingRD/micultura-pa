@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MessageSquare, AlertCircle, Clock, ChevronRight, Search, Filter, Edit3, CheckCircle, XCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { HeaderPortal } from '../components/portal/HeaderPortal';
 import { SidebarPortal } from '../components/portal/SidebarPortal';
+import { CitizenSubsanarModal } from '../components/portal/CitizenSubsanarModal';
 
 export default function Reviews() {
   const { token, user } = useAuth();
@@ -12,42 +13,42 @@ export default function Reviews() {
   const [profileStatus, setProfileStatus] = useState<string | null>(null);
   const [works, setWorks] = useState<any[]>([]); // Obras reales de DB
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedWorkForSubsanar, setSelectedWorkForSubsanar] = useState<any | null>(null);
 
   const [activeTab, setActiveTab] = useState<'all' | 'OBSERVED' | 'UNDER_REVIEW' | 'IN_CREATION'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('Todas');
 
-  useEffect(() => {
-    const fetchProfileAndWorks = async () => {
-        if (!token || !user) return;
-        try {
-            // Check Profile status for layout consistency
-            const responseStatus = await fetch('/api/portal/profile-status', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (responseStatus.ok) {
-                const data = await responseStatus.json();
-                setProfileStatus(data.status);
-            }
+  const fetchProfileAndWorks = useCallback(async () => {
+      if (!token || !user) return;
+      try {
+          // Check Profile status for layout consistency
+          const responseStatus = await fetch('/api/portal/profile-status', {
+              headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (responseStatus.ok) {
+              const data = await responseStatus.json();
+              setProfileStatus(data.status);
+          }
 
-            // Simulamos obtener la lista de obras del usuario (hasta tener un endpoint list real)
-            const responseWorks = await fetch('/api/portal/works/list', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (responseWorks.ok) {
-                const worksData = await responseWorks.json();
-                setWorks(worksData);
-            }
-            
-            
-        } catch (error) {
-            console.error("Error fetching data", error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-    fetchProfileAndWorks();
+          // Simulamos obtener la lista de obras del usuario (hasta tener un endpoint list real)
+          const responseWorks = await fetch('/api/portal/works/list', {
+              headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (responseWorks.ok) {
+              const worksData = await responseWorks.json();
+              setWorks(worksData);
+          }
+      } catch (error) {
+          console.error("Error fetching data", error);
+      } finally {
+          setIsLoading(false);
+      }
   }, [token, user]);
+
+  useEffect(() => {
+    fetchProfileAndWorks();
+  }, [fetchProfileAndWorks]);
 
   // Ya no filtramos previamente por estado, queremos disponer de todas
   const uniqueCategories = ['Todas', ...Array.from(new Set(works.map(w => w.category)))];
@@ -246,7 +247,7 @@ export default function Reviews() {
                               ) : work.status === 'OBSERVED' ? (
                                 <button
                                   className="mx-auto bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-sm font-medium transition-colors"
-                                  onClick={() => navigate(`/portal/obras/${work.id}`)}
+                                  onClick={() => setSelectedWorkForSubsanar(work)}
                                 >
                                   Subsanar
                                 </button>
@@ -276,6 +277,13 @@ export default function Reviews() {
                 )}
               </div>
             </div>
+
+            <CitizenSubsanarModal
+                isOpen={!!selectedWorkForSubsanar}
+                onClose={() => setSelectedWorkForSubsanar(null)}
+                work={selectedWorkForSubsanar}
+                onResubmitted={fetchProfileAndWorks}
+            />
 
             <style>{`
               .animate-fade-in { animation: fadeIn 0.4s ease-out; }
