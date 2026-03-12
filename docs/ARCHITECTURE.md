@@ -34,14 +34,18 @@ graph TD
     
     subgraph Frontend
     ReactUI --> AuthCtx["AuthContext / ThemeContext"]
-    ReactUI --> Pages["Vistas: Mapa, Directorio, Admin"]
+    ReactUI --> Landing["Vistas Públicas: Mapa, Directorio, Home"]
+    ReactUI --> Portal["Portal Ciudadano: Mis Obras, Perfil, Subsanación"]
+    ReactUI --> Backoffice["Backoffice: Evaluadores, Aprobaciones"]
     end
 
-    Pages -->|HTTP Fetch| APIBridge{"API Gateway / Vercel Edge"}
+    Landing -->|HTTP Fetch| APIBridge{"API Gateway / Vercel Edge"}
+    Portal -->|HTTP Fetch (Auth JWT)| APIBridge
+    Backoffice -->|HTTP Fetch (Auth JWT)| APIBridge
 
     subgraph Infraestructura Backend
     APIBridge -->|Local| Express("Servidor Express Local")
-    APIBridge -->|Producción| Serverless("Vercel Serverless Functions")
+    APIBridge -->|Producción| Serverless("Vercel Serverless Functions (/api/*)")
     end
 
     Express --> Domain("Capa de Dominio")
